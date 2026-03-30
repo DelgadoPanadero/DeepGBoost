@@ -5,7 +5,7 @@
 
 Machine Learning algorithm based on gradient boosting forest that merges the power of tree ensembles with neural network architectures.
 
-<div align="center"><img src="./doc/icon.svg" width="60%"></div>
+<div align="center"><img src="./doc/icon.svg" width="50%"></div>
 
 ## Installation
 
@@ -61,14 +61,19 @@ Classical tree ensemble methods — RandomForest (*bagging*) and GradientBoostin
 
 The core idea is to distribute the gradient descent of each boosting step across the individual trees of a RandomForest layer, so that each tree learns an independent gradient component:
 
+</br>
+
 $$F_i(x) = \sum_{l=1}^{L} RF_l(x) = \frac{1}{T} \sum_{l=0}^{L} \sum_{t=0}^{T} h_{l,t}(x)$$
+
+</br>
+
 
 where *L* is the number of boosting layers and *T* is the number of trees per layer. This structure is a direct analogue of a **Dense Neural Network**, where each RandomForest layer corresponds to a network layer, with distributed gradients replacing back-propagation.
 
 
 <div align="center"><img src="doc/fig1.png" width="80%"></div>
 
-**Fig. 1** — **NeuralNetwork vs DGBF architecture**: In NN (left), each neuron's output feeds into the next layer via back-propagation. In DGBF (right), the distributed gradients of all trees from each layer are forwarded to every tree of the following layer.
+<div align="center" style="width:80%; margin:auto;"><strong>Fig. 1</strong> — <strong>NeuralNetwork vs DGBF architecture</strong>: In NN (left), each neuron's output feeds into the next layer via back-propagation. In DGBF (right), the distributed gradients of all trees from each layer are forwarded to every tree of the following layer.</div>
 
 Both RandomForest and GradientBoosting emerge naturally as special cases of DGBF: RandomForest is recovered with a single layer (*L* = 1) and GradientBoosting with a single tree per layer (*T* = 1).
 
@@ -76,7 +81,7 @@ Both RandomForest and GradientBoosting emerge naturally as special cases of DGBF
 <div align="center"><img src="doc/fig2.png" width="80%"></div>
 
 
-**Fig. 2** — **RandomForest & GradientBoosting as DGBF special cases**:RandomForest (left) and GradientBoosting (right) represented as particular graph architectures of DGBF.
+<div align="center" style="width:80%; margin:auto;"><strong>Fig. 2</strong> — <strong>RandomForest & GradientBoosting as DGBF special cases</strong>: RandomForest (left) and GradientBoosting (right) represented as particular graph architectures of DGBF.</div>
 
 ### Benchmark
 
@@ -85,6 +90,27 @@ DGBF was evaluated against RandomForest (RF) and GradientBoosting (GBDT) on 9 re
 **DGBF surpasses the mean R² score of both GradientBoosting and RandomForest in 7 out of 9 datasets**
 
 <div align="center"><img src="doc/benchmark.png" width="80%"></div>
+
+To reproduce the benchmark, run the experiment script from the `benchmark/` directory:
+
+```bash
+cd benchmark
+python run_experiments.py
+```
+
+The script reads its configuration from `benchmark/config.json`, where you can adjust the models, hyperparameters, datasets, and experiment settings (e.g. number of bootstrap runs). Results are saved to `benchmark/results/`.
+
+## Contributing
+
+Contributions are welcome. To get started:
+
+1. Fork the repository and create a branch from `main`.
+2. Install development dependencies: `pip install -e '.[dev]'`
+3. Make your changes and add tests as needed.
+4. Run the test suite: `pytest`
+5. Open a pull request describing what you changed and why.
+
+Please open an issue first for significant changes so the approach can be discussed before implementation.
 
 ## Citation
 
