@@ -10,7 +10,6 @@ Mirrors XGBoost's ``core.py`` module.
 
 from __future__ import annotations
 
-import json
 import pickle
 from pathlib import Path
 from typing import Sequence

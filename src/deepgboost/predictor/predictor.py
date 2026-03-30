@@ -55,8 +55,8 @@ class DeepGBoostPredictor:
         # Per-tree accumulator initialised at the prior (F_0 = mean(y))
         accum = np.full((n_samples, n_trees), model.prior_, dtype=np.float64)
 
-        for l, layer in enumerate(model.graph_):
-            layer_weights = model.weights_[l]
+        for layer_idx, layer in enumerate(model.graph_):
+            layer_weights = model.weights_[layer_idx]
 
             for t, tree in enumerate(layer):
                 # tree.predict returns (n_samples, n_trees)
@@ -67,7 +67,7 @@ class DeepGBoostPredictor:
                 accum[:, t] += tree_scalar
 
             if model.linear_projection and model.linear_models_:
-                lin = model.linear_models_[l]
+                lin = model.linear_models_[layer_idx]
                 lin_correction = lin.predict(X)  # (n_samples,)
                 # Broadcast linear correction to all tree slots
                 accum += lin_correction[:, np.newaxis] * lin.alpha_mix_
@@ -88,15 +88,15 @@ class DeepGBoostPredictor:
         n_trees = model.n_trees
         accum = np.full((n_samples, n_trees), model.prior_, dtype=np.float64)
 
-        for l, layer in enumerate(model.graph_):
-            layer_weights = model.weights_[l]
+        for layer_idx, layer in enumerate(model.graph_):
+            layer_weights = model.weights_[layer_idx]
             for t, tree in enumerate(layer):
                 tree_out = tree.predict(X)
                 w = layer_weights[t]
                 accum[:, t] += (tree_out * w).sum(axis=1)
 
             if model.linear_projection and model.linear_models_:
-                lin = model.linear_models_[l]
+                lin = model.linear_models_[layer_idx]
                 accum += lin.predict(X)[:, np.newaxis] * lin.alpha_mix_
 
         return accum

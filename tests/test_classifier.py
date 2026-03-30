@@ -211,7 +211,6 @@ class TestDeepGBoostClassifierSklearnCompat:
     def test_string_labels(self, multiclass_split):
         X_train, X_test, y_train, y_test = multiclass_split
         y_str_train = np.array(["class_a", "class_b", "class_c"])[y_train]
-        y_str_test = np.array(["class_a", "class_b", "class_c"])[y_test]
         clf = DeepGBoostClassifier(n_trees=3, n_layers=5, random_state=0)
         clf.fit(X_train, y_str_train)
         preds = clf.predict(X_test)

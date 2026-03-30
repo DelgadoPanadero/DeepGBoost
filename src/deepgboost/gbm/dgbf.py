@@ -13,7 +13,6 @@ each tree independently learning a distributed gradient component.
 
 from __future__ import annotations
 
-import copy
 from typing import TYPE_CHECKING, Sequence
 
 import numpy as np
@@ -166,7 +165,7 @@ class DGBFModel:
         for cb in callbacks:
             cb.before_training(self)
 
-        for l in range(self.n_layers):
+        for layer_idx in range(self.n_layers):
             # --- Compute current predictions and pseudo-residuals --------
             # F_{l-1}(X): raw ensemble prediction up to layer l-1
             F_prev = self._predictor.predict_raw(self, X)  # (n_samples,)
@@ -187,13 +186,13 @@ class DGBFModel:
             stop = False
             evals_log: dict = {}
             for cb in callbacks:
-                if cb.before_iteration(self, l, evals_log):
+                if cb.before_iteration(self, layer_idx, evals_log):
                     stop = True
             if stop:
                 break
 
             # --- Fit this layer ------------------------------------------
-            new_layer, new_weights = self._fit_layer(X, pseudo_y, l, rng)
+            new_layer, new_weights = self._fit_layer(X, pseudo_y, layer_idx, rng)
             self.graph_.append(new_layer)
             self.weights_.append(new_weights)
 
@@ -202,7 +201,7 @@ class DGBFModel:
                 sample_idx = bootstrap_sampler(
                     n_samples,
                     self.n_layers,
-                    l,
+                    layer_idx,
                     self.subsample_min_frac,
                     rng,
                 )
@@ -235,7 +234,7 @@ class DGBFModel:
             # After-iteration callbacks
             stop = False
             for cb in callbacks:
-                if cb.after_iteration(self, l, evals_log):
+                if cb.after_iteration(self, layer_idx, evals_log):
                     stop = True
             if stop:
                 break
