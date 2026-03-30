@@ -72,7 +72,7 @@ where *L* is the number of boosting layers and *T* is the number of trees per la
 
 
 <div align="center" style="width:80%; margin:auto;">
-<img src="doc/fig1.png" width="100%">
+<img src="doc/fig1.png" width="80%">
 <p><strong>Fig. 1</strong> — <strong>NeuralNetwork vs DGBF architecture</strong>: In NN (left), each neuron's output feeds into the next layer via back-propagation. In DGBF (right), the distributed gradients of all trees from each layer are forwarded to every tree of the following layer.</p>
 </div>
 
@@ -80,7 +80,7 @@ Both RandomForest and GradientBoosting emerge naturally as special cases of DGBF
 
 
 <div align="center" style="width:80%; margin:auto;">
-<img src="doc/fig2.png" width="100%">
+<img src="doc/fig2.png" width="80%">
 <p><strong>Fig. 2</strong> — <strong>RandomForest & GradientBoosting as DGBF special cases</strong>: RandomForest (left) and GradientBoosting (right) represented as particular graph architectures of DGBF.</p>
 </div>
 
@@ -88,9 +88,10 @@ Both RandomForest and GradientBoosting emerge naturally as special cases of DGBF
 
 DGBF was evaluated against RandomForest (RF) and GradientBoosting (GBDT) on 9 regression datasets from the UCI Machine Learning Repository (Parkinson, Wine, Concrete, Obesity, NavalVessel, Temperature, Cargo2000, BikeSales, Superconduct), using 200 randomized simulations per dataset with an 80/20 train-test split.
 
-🏆 **DGBF surpasses the mean R² score of both GradientBoosting and RandomForest in 7 out of 9 datasets**
-
 <div align="center"><img src="doc/benchmark.png" width="80%"></div>
+
+> [!note] **Winner DeepGBoost**
+> 🏆 DGBF surpasses the mean R² score of both GradientBoosting and RandomForest in 7 out of 9 datasets
 
 To reproduce the benchmark, run the experiment script from the `benchmark/` directory:
 
