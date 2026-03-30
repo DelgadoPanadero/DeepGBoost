@@ -1,5 +1,8 @@
 # DeepGBoost
 
+[![CI](https://github.com/DelgadoPanadero/DeepGBoost/actions/workflows/ci.yml/badge.svg)](https://github.com/DelgadoPanadero/DeepGBoost/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/DelgadoPanadero/DeepGBoost/branch/main/graph/badge.svg)](https://codecov.io/gh/DelgadoPanadero/DeepGBoost)
+
 Machine Learning algorithm based on gradient boosting forest that merges the power of tree ensembles with neural network architectures.
 
 <div align="center"><img src="./doc/icon.svg" width="80%"></div>
