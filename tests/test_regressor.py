@@ -5,7 +5,6 @@ import pytest
 from sklearn.base import clone
 from sklearn.datasets import load_diabetes
 from sklearn.model_selection import train_test_split
-from sklearn.utils.estimator_checks import parametrize_with_checks
 
 from deepgboost import DeepGBoostRegressor
 

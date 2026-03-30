@@ -21,7 +21,6 @@ from sklearn.utils.validation import check_is_fitted, check_array
 
 from .gbm.dgbf import DGBFModel
 from .callback import TrainingCallback
-from .common.utils import sigmoid, softmax
 
 
 # ---------------------------------------------------------------------------
