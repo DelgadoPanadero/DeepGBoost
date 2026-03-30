@@ -2,7 +2,7 @@
 
 Machine Learning algorithm based on gradient boosting forest that merges the power of tree ensembles with neural network architectures.
 
-![icon](./doc/icon.svg)
+<div align="center"><img src="./doc/icon.svg" width="80%"></div>
 
 ## Installation
 
@@ -63,14 +63,14 @@ $$F_i(x) = \sum_{l=1}^{L} RF_l(x) = \frac{1}{T} \sum_{l=0}^{L} \sum_{t=0}^{T} h_
 where *L* is the number of boosting layers and *T* is the number of trees per layer. This structure is a direct analogue of a **Dense Neural Network**, where each RandomForest layer corresponds to a network layer, with distributed gradients replacing back-propagation.
 
 
-![Fig 1](doc/fig1.png) 
+<div align="center"><img src="doc/fig1.png" width="80%"></div>
 
 **Fig. 1** — **NeuralNetwork vs DGBF architecture**: In NN (left), each neuron's output feeds into the next layer via back-propagation. In DGBF (right), the distributed gradients of all trees from each layer are forwarded to every tree of the following layer.
 
 Both RandomForest and GradientBoosting emerge naturally as special cases of DGBF: RandomForest is recovered with a single layer (*L* = 1) and GradientBoosting with a single tree per layer (*T* = 1).
 
 
-![Fig 2](doc/fig2.png)
+<div align="center"><img src="doc/fig2.png" width="80%"></div>
 
 
 **Fig. 2** — **RandomForest & GradientBoosting as DGBF special cases**:RandomForest (left) and GradientBoosting (right) represented as particular graph architectures of DGBF.
@@ -81,7 +81,7 @@ DGBF was evaluated against RandomForest (RF) and GradientBoosting (GBDT) on 9 re
 
 **DGBF surpasses the mean R² score of both GradientBoosting and RandomForest in 7 out of 9 datasets**
 
-![Benchmark](doc/benchmark.png)
+<div align="center"><img src="doc/benchmark.png" width="80%"></div>
 
 ## Citation
 
