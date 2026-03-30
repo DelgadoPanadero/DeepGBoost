@@ -4,3 +4,4 @@ repos:
     hooks:
       - id: ruff-format
         args: [--line-length, "80"]
+        types_or: [python, pyi, jupyter]
