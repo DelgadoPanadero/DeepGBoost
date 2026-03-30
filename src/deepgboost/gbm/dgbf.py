@@ -13,6 +13,7 @@ each tree independently learning a distributed gradient component.
 
 from __future__ import annotations
 
+import copy
 from typing import TYPE_CHECKING, Sequence
 
 import numpy as np
@@ -165,16 +166,16 @@ class DGBFModel:
         for cb in callbacks:
             cb.before_training(self)
 
-        for layer_idx in range(self.n_layers):
+        for l in range(self.n_layers):
             # --- Compute current predictions and pseudo-residuals --------
             # F_{l-1}(X): raw ensemble prediction up to layer l-1
-            F_prev = self._predictor.predict_raw(self, X)  # (n_samples,)
+            F_prev = self._predictor.predict_raw(self, X)   # (n_samples,)
 
             # Gradient for each tree slot (paper eq. 8):
             # g'_{l,t}(x_i) = y_i - F_{l-1}(x_i)  (distributed: same for all t
             # in this implementation — each tree learns its own component via
             # independent bootstrap subsamples and multi-output regression)
-            g_global = obj.gradient(y, F_prev)  # (n_samples,)
+            g_global = obj.gradient(y, F_prev)              # (n_samples,)
 
             # Pseudo-residuals matrix: (n_samples, n_trees)
             # Each column t contains the residuals for tree slot t
@@ -186,24 +187,21 @@ class DGBFModel:
             stop = False
             evals_log: dict = {}
             for cb in callbacks:
-                if cb.before_iteration(self, layer_idx, evals_log):
+                if cb.before_iteration(self, l, evals_log):
                     stop = True
             if stop:
                 break
 
             # --- Fit this layer ------------------------------------------
-            new_layer, new_weights = self._fit_layer(X, pseudo_y, layer_idx, rng)
+            new_layer, new_weights = self._fit_layer(X, pseudo_y, l, rng)
             self.graph_.append(new_layer)
             self.weights_.append(new_weights)
 
             # --- Optional linear projection ------------------------------
             if self.linear_projection:
                 sample_idx = bootstrap_sampler(
-                    n_samples,
-                    self.n_layers,
-                    layer_idx,
-                    self.subsample_min_frac,
-                    rng,
+                    n_samples, self.n_layers, l,
+                    self.subsample_min_frac, rng,
                 )
                 lin = LinearUpdater(alpha=self.linear_alpha)
                 lin.fit(X[sample_idx], pseudo_y[sample_idx].mean(axis=1))
@@ -212,9 +210,7 @@ class DGBFModel:
                 resid_full = pseudo_y.mean(axis=1)
                 var_total = np.var(resid_full) + 1e-10
                 var_lin = np.var(resid_full - lin_pred_full)
-                lin.alpha_mix_ = float(
-                    np.clip(1.0 - var_lin / var_total, 0.0, 1.0)
-                )
+                lin.alpha_mix_ = float(np.clip(1.0 - var_lin / var_total, 0.0, 1.0))
                 self.linear_models_.append(lin)
 
             # --- Accumulate feature importances -------------------------
@@ -234,7 +230,7 @@ class DGBFModel:
             # After-iteration callbacks
             stop = False
             for cb in callbacks:
-                if cb.after_iteration(self, layer_idx, evals_log):
+                if cb.after_iteration(self, l, evals_log):
                     stop = True
             if stop:
                 break
@@ -242,8 +238,7 @@ class DGBFModel:
         # Normalise feature importances
         total = feature_importance_accum.sum()
         self.feature_importances_ = (
-            feature_importance_accum / total
-            if total > 0
+            feature_importance_accum / total if total > 0
             else feature_importance_accum
         )
 
@@ -280,11 +275,8 @@ class DGBFModel:
         for t in range(self.n_trees):
             # Dynamic bootstrap subsample (paper sec. 3.1.3)
             sample_idx = bootstrap_sampler(
-                n_samples,
-                self.n_layers,
-                layer_idx,
-                self.subsample_min_frac,
-                rng,
+                n_samples, self.n_layers, layer_idx,
+                self.subsample_min_frac, rng,
             )
 
             # Derive per-tree seed from master rng
@@ -294,12 +286,10 @@ class DGBFModel:
             tree.fit(X[sample_idx], pseudo_y[sample_idx])
 
             # Compute output weights (paper eq. 11) on FULL dataset
-            tree_out_full = tree.predict(X)  # (n_samples, n_trees)
-            y_target = pseudo_y.mean(axis=1)  # (n_samples,) — mean gradient
+            tree_out_full = tree.predict(X)      # (n_samples, n_trees)
+            y_target = pseudo_y.mean(axis=1)    # (n_samples,) — mean gradient
 
-            w = weight_solver(
-                tree_out_full, y_target, method=self.weight_solver
-            )
+            w = weight_solver(tree_out_full, y_target, method=self.weight_solver)
 
             new_layer.append(tree)
             new_weights.append(w)
@@ -310,10 +300,7 @@ class DGBFModel:
     # Inference
     # ------------------------------------------------------------------
 
-    def predict(
-        self,
-        X: np.ndarray,
-    ) -> np.ndarray:
+    def predict(self, X: np.ndarray) -> np.ndarray:
         """
         Raw ensemble prediction (in the objective's transformed space).
 
@@ -329,10 +316,7 @@ class DGBFModel:
         raw = self._predictor.predict_raw(self, X)
         return self._objective.transform(raw)
 
-    def predict_raw(
-        self,
-        X: np.ndarray,
-    ) -> np.ndarray:
+    def predict_raw(self, X: np.ndarray) -> np.ndarray:
         """Return predictions before applying the output transform."""
         self._check_is_fitted()
         return self._predictor.predict_raw(self, X)

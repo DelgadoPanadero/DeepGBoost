@@ -1,14 +1,11 @@
 """Tests for DeepGBoostRegressor (sklearn.py)."""
 
-import io
-import pickle
-
 import numpy as np
-import pandas as pd
 import pytest
 from sklearn.base import clone
 from sklearn.datasets import load_diabetes
 from sklearn.model_selection import train_test_split
+from sklearn.utils.estimator_checks import parametrize_with_checks
 
 from deepgboost import DeepGBoostRegressor
 
@@ -156,127 +153,3 @@ class TestDeepGBoostRegressorSklearnCompat:
         reg.fit(X_train, y_train, eval_set=[(X_test, y_test)])
         result = reg.evals_result_
         assert isinstance(result, dict)
-
-
-# ---------------------------------------------------------------------------
-# Categorical encoding
-# ---------------------------------------------------------------------------
-
-@pytest.fixture
-def cat_data_numpy():
-    """Small regression dataset with one categorical column (numpy object array)."""
-    X = np.array([
-        [1.0, "red",   10.0],
-        [2.0, "blue",  20.0],
-        [3.0, "red",   30.0],
-        [4.0, "green", 40.0],
-        [5.0, "blue",  50.0],
-        [6.0, "red",   60.0],
-    ], dtype=object)
-    y = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
-    return X, y
-
-
-@pytest.fixture
-def cat_data_pandas():
-    """Small regression dataset as a pandas DataFrame with one string column."""
-    X = pd.DataFrame({
-        "age":    [25, 30, 35, 40, 45, 50],
-        "city":   ["Madrid", "Barcelona", "Madrid", "Sevilla", "Barcelona", "Sevilla"],
-        "income": [30000, 45000, 50000, 60000, 55000, 70000],
-    })
-    y = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
-    return X, y
-
-
-class TestDeepGBoostRegressorCategorical:
-
-    _REG = DeepGBoostRegressor(n_trees=3, n_layers=5, random_state=0)
-
-    def test_numpy_detects_categorical_column(self, cat_data_numpy):
-        X, y = cat_data_numpy
-        reg = clone(self._REG)
-        reg.fit(X, y)
-        assert reg.categorical_columns_ == [1]
-        assert reg.numerical_columns_ == [0, 2]
-
-    def test_pandas_detects_categorical_column(self, cat_data_pandas):
-        X, y = cat_data_pandas
-        reg = clone(self._REG)
-        reg.fit(X, y)
-        assert reg.categorical_columns_ == [1]
-        assert reg.numerical_columns_ == [0, 2]
-
-    def test_ohe_is_fitted(self, cat_data_numpy):
-        X, y = cat_data_numpy
-        reg = clone(self._REG)
-        reg.fit(X, y)
-        assert reg.ohe_ is not None
-        assert len(reg.ohe_.categories_) == 1
-        assert set(reg.ohe_.categories_[0]) == {"red", "blue", "green"}
-
-    def test_no_encoder_when_all_numeric(self, diabetes_split):
-        X_train, _, y_train, _ = diabetes_split
-        reg = clone(self._REG)
-        reg.fit(X_train, y_train)
-        assert reg.ohe_ is None
-        assert reg.categorical_columns_ == []
-
-    def test_predictions_finite(self, cat_data_numpy):
-        X, y = cat_data_numpy
-        reg = clone(self._REG)
-        reg.fit(X, y)
-        preds = reg.predict(X)
-        assert preds.shape == (len(y),)
-        assert np.all(np.isfinite(preds))
-
-    def test_eval_set_with_categorical(self, cat_data_numpy):
-        X, y = cat_data_numpy
-        reg = clone(self._REG)
-        reg.fit(X, y, eval_set=[(X, y)])
-        assert isinstance(reg.evals_result_, dict)
-
-    def test_pickle_preserves_encoder(self, cat_data_numpy):
-        X, y = cat_data_numpy
-        reg = clone(self._REG)
-        reg.fit(X, y)
-
-        buf = io.BytesIO()
-        pickle.dump(reg, buf)
-        buf.seek(0)
-        reg_loaded = pickle.load(buf)
-
-        assert reg_loaded.categorical_columns_ == reg.categorical_columns_
-        assert reg_loaded.numerical_columns_ == reg.numerical_columns_
-        assert reg_loaded.ohe_ is not None
-        np.testing.assert_array_equal(
-            reg_loaded.ohe_.categories_[0], reg.ohe_.categories_[0]
-        )
-
-    def test_pickle_identical_predictions(self, cat_data_numpy):
-        X, y = cat_data_numpy
-        reg = clone(self._REG)
-        reg.fit(X, y)
-        preds_before = reg.predict(X)
-
-        buf = io.BytesIO()
-        pickle.dump(reg, buf)
-        buf.seek(0)
-        reg_loaded = pickle.load(buf)
-
-        preds_after = reg_loaded.predict(X)
-        np.testing.assert_array_equal(preds_before, preds_after)
-
-    def test_pickle_no_encoder_identical_predictions(self, diabetes_split):
-        X_train, X_test, y_train, _ = diabetes_split
-        reg = clone(self._REG)
-        reg.fit(X_train, y_train)
-        preds_before = reg.predict(X_test)
-
-        buf = io.BytesIO()
-        pickle.dump(reg, buf)
-        buf.seek(0)
-        reg_loaded = pickle.load(buf)
-
-        preds_after = reg_loaded.predict(X_test)
-        np.testing.assert_array_equal(preds_before, preds_after)

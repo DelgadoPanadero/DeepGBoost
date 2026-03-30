@@ -49,9 +49,7 @@ def bootstrap_sampler(
     if n_layers <= 1:
         size = n_samples
     else:
-        size = int(
-            min_size + (n_samples - min_size) * layer_idx / (n_layers - 1)
-        )
+        size = int(min_size + (n_samples - min_size) * layer_idx / (n_layers - 1))
         size = min(size, n_samples)
 
     return rng.choice(n_samples, size=size, replace=True)
@@ -97,9 +95,7 @@ def weight_solver(
     return weights / total
 
 
-def sigmoid(
-    x: np.ndarray,
-) -> np.ndarray:
+def sigmoid(x: np.ndarray) -> np.ndarray:
     """Numerically stable sigmoid."""
     return np.where(
         x >= 0,
@@ -108,10 +104,7 @@ def sigmoid(
     )
 
 
-def softmax(
-    x: np.ndarray,
-    axis: int = -1,
-) -> np.ndarray:
+def softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
     """Row-wise softmax with numerical stability."""
     shifted = x - x.max(axis=axis, keepdims=True)
     exp_x = np.exp(shifted)

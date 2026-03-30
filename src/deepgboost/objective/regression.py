@@ -8,11 +8,7 @@ import numpy as np
 class BaseObjective:
     """Abstract base for all DeepGBoost objective functions."""
 
-    def gradient(
-        self,
-        y: np.ndarray,
-        F: np.ndarray,
-    ) -> np.ndarray:
+    def gradient(self, y: np.ndarray, F: np.ndarray) -> np.ndarray:
         """
         Compute pseudo-residuals (negative gradient of the loss).
 
@@ -29,17 +25,11 @@ class BaseObjective:
         """
         raise NotImplementedError
 
-    def prior(
-        self,
-        y: np.ndarray,
-    ) -> float:
+    def prior(self, y: np.ndarray) -> float:
         """Optimal constant prediction (F_0 in the paper)."""
         raise NotImplementedError
 
-    def transform(
-        self,
-        raw: np.ndarray,
-    ) -> np.ndarray:
+    def transform(self, raw: np.ndarray) -> np.ndarray:
         """Map raw model output to prediction space (identity for regression)."""
         return raw
 
@@ -53,11 +43,7 @@ class RMSEObjective(BaseObjective):
     Prior: mean(y)
     """
 
-    def gradient(
-        self,
-        y: np.ndarray,
-        F: np.ndarray,
-    ) -> np.ndarray:
+    def gradient(self, y: np.ndarray, F: np.ndarray) -> np.ndarray:
         return y - F
 
     def prior(self, y: np.ndarray) -> float:
@@ -73,11 +59,7 @@ class MAEObjective(BaseObjective):
     Prior: median(y)
     """
 
-    def gradient(
-        self,
-        y: np.ndarray,
-        F: np.ndarray,
-    ) -> np.ndarray:
+    def gradient(self, y: np.ndarray, F: np.ndarray) -> np.ndarray:
         return np.sign(y - F)
 
     def prior(self, y: np.ndarray) -> float:

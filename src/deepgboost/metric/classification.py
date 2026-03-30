@@ -27,15 +27,9 @@ class LogLossMetric(BaseMetric):
     name = "logloss"
     higher_is_better = False
 
-    def __call__(
-        self,
-        y_true: np.ndarray,
-        y_pred: np.ndarray,
-    ) -> float:
+    def __call__(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         p = np.clip(y_pred, 1e-7, 1 - 1e-7)
-        return float(
-            -np.mean(y_true * np.log(p) + (1.0 - y_true) * np.log(1.0 - p))
-        )
+        return float(-np.mean(y_true * np.log(p) + (1.0 - y_true) * np.log(1.0 - p)))
 
 
 class AUCMetric(BaseMetric):
@@ -48,11 +42,7 @@ class AUCMetric(BaseMetric):
     name = "auc"
     higher_is_better = True
 
-    def __call__(
-        self,
-        y_true: np.ndarray,
-        y_pred: np.ndarray,
-    ) -> float:
+    def __call__(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         order = np.argsort(y_pred)[::-1]
         y_sorted = y_true[order]
         n_pos = y_sorted.sum()

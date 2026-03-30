@@ -168,7 +168,7 @@ class TestEvaluationMonitor:
         )
         captured = capsys.readouterr()
         # With 4 layers and period=2, should print at layers 2 and 4
-        lines = [line for line in captured.out.strip().split("\n") if line]
+        lines = [l for l in captured.out.strip().split("\n") if l]
         assert len(lines) == 2
 
     def test_monitor_silent_without_evals(self, diabetes_split, capsys):

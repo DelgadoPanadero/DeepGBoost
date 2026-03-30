@@ -6,14 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "deepgboost"
 version = "0.1.0"
 description = "Distributed Gradient Boosting Forest — deep graph tree ensemble algorithm"
-requires-python = ">=3.10"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-]
+requires-python = ">=3.9"
 dependencies = [
     "numpy>=1.24",
     "scipy>=1.10",
@@ -22,15 +15,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=7",
-    "pytest-cov",
-    "nbmake>=1.5",
-    "matplotlib>=3.7",
-    "ruff>=0.15.8",
-    "pre-commit>=4",
-    "tqdm==4.67.3",
-]
+dev = ["pytest>=7", "pytest-cov", "matplotlib>=3.7"]
 plotting = ["matplotlib>=3.7"]
 
 [tool.setuptools.packages.find]

@@ -32,24 +32,13 @@ class TrainingCallback:
     All methods have safe default implementations (no-op / False).
     """
 
-    def before_training(
-        self,
-        model,
-    ) -> None:
+    def before_training(self, model) -> None:
         """Called once before the layer loop begins."""
 
-    def after_training(
-        self,
-        model,
-    ) -> None:
+    def after_training(self, model) -> None:
         """Called once after the layer loop ends (or early-stopping)."""
 
-    def before_iteration(
-        self,
-        model,
-        epoch: int,
-        evals_log: dict,
-    ) -> bool:
+    def before_iteration(self, model, epoch: int, evals_log: dict) -> bool:
         """
         Called at the start of each boosting layer.
 
@@ -60,12 +49,7 @@ class TrainingCallback:
         """
         return False
 
-    def after_iteration(
-        self,
-        model,
-        epoch: int,
-        evals_log: dict,
-    ) -> bool:
+    def after_iteration(self, model, epoch: int, evals_log: dict) -> bool:
         """
         Called at the end of each boosting layer.
 
@@ -128,12 +112,7 @@ class EarlyStopping(TrainingCallback):
         self._best_epoch = 0
         self._wait = 0
 
-    def after_iteration(
-        self,
-        model,
-        epoch: int,
-        evals_log: dict,
-    ) -> bool:
+    def after_iteration(self, model, epoch: int, evals_log: dict) -> bool:
         if not evals_log:
             return False
 
@@ -191,12 +170,7 @@ class LearningRateScheduler(TrainingCallback):
     def __init__(self, schedule_fn):
         self.schedule_fn = schedule_fn
 
-    def before_iteration(
-        self,
-        model,
-        epoch: int,
-        evals_log: dict,
-    ) -> bool:
+    def before_iteration(self, model, epoch: int, evals_log: dict) -> bool:
         model.learning_rate = float(self.schedule_fn(epoch))
         return False
 
@@ -211,18 +185,10 @@ class EvaluationMonitor(TrainingCallback):
         Print every ``period`` layers (default 1 = every layer).
     """
 
-    def __init__(
-        self,
-        period: int = 1,
-    ):
+    def __init__(self, period: int = 1):
         self.period = period
 
-    def after_iteration(
-        self,
-        model,
-        epoch: int,
-        evals_log: dict,
-    ) -> bool:
+    def after_iteration(self, model, epoch: int, evals_log: dict) -> bool:
         if (epoch + 1) % self.period == 0 and evals_log:
             parts = []
             for dataset, metrics in evals_log.items():

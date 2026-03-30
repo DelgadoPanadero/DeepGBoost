@@ -25,7 +25,7 @@ def plot_importance(
     ax=None,
     figsize: tuple[float, float] = (8, 6),
     color: str = "#3498db",
-) -> "tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]":
+) -> "matplotlib.axes.Axes":
     """
     Plot feature importances as a horizontal bar chart.
 
@@ -52,7 +52,7 @@ def plot_importance(
 
     Returns
     -------
-    tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+    matplotlib.axes.Axes
     """
     try:
         import matplotlib.pyplot as plt
@@ -76,9 +76,7 @@ def plot_importance(
         )
 
     if importances is None:
-        raise ValueError(
-            "Model has not been fitted or feature importances are None."
-        )
+        raise ValueError("Model has not been fitted or feature importances are None.")
 
     n_features = len(importances)
 
@@ -95,13 +93,9 @@ def plot_importance(
     selected_scores = importances[indices]
 
     if ax is None:
-        fig, ax = plt.subplots(figsize=figsize)
-    else:
-        fig = ax.get_figure()
+        _, ax = plt.subplots(figsize=figsize)
 
-    ax.barh(
-        range(len(indices)), selected_scores, color=color, edgecolor="white"
-    )
+    ax.barh(range(len(indices)), selected_scores, color=color, edgecolor="white")
     ax.set_yticks(range(len(indices)))
     ax.set_yticklabels(selected_names)
     ax.set_title(title)
@@ -109,4 +103,4 @@ def plot_importance(
     ax.grid(axis="x", linestyle="--", alpha=0.5)
     plt.tight_layout()
 
-    return fig, ax
+    return ax

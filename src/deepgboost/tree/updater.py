@@ -28,11 +28,7 @@ class TreeUpdater:
         Seed for the underlying tree splitter.
     """
 
-    def __init__(
-        self,
-        max_depth: int | None = None,
-        random_state: int | None = None,
-    ):
+    def __init__(self, max_depth: int | None = None, random_state: int | None = None):
         self.max_depth = max_depth
         self.random_state = random_state
         self._tree = DecisionTreeRegressor(
@@ -40,11 +36,7 @@ class TreeUpdater:
             random_state=random_state,
         )
 
-    def fit(
-        self,
-        X_sub: np.ndarray,
-        pseudo_y_sub: np.ndarray,
-    ) -> "TreeUpdater":
+    def fit(self, X_sub: np.ndarray, pseudo_y_sub: np.ndarray) -> "TreeUpdater":
         """
         Fit the tree on a bootstrap subsample.
 
@@ -61,10 +53,7 @@ class TreeUpdater:
         self._tree.fit(X_sub, pseudo_y_sub)
         return self
 
-    def predict(
-        self,
-        X: np.ndarray,
-    ) -> np.ndarray:
+    def predict(self, X: np.ndarray) -> np.ndarray:
         """
         Predict gradient components for all samples.
 

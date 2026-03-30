@@ -34,8 +34,7 @@ Functional API (mirrors XGBoost)::
 
 from .core import DeepGBoostDMatrix, DeepGBoostBooster
 from .training import train, cv
-from .deepgboost_regressor import DeepGBoostRegressor
-from .deepgboost_classifier import DeepGBoostClassifier
+from .sklearn import DeepGBoostRegressor, DeepGBoostClassifier
 from .callback import (
     TrainingCallback,
     EarlyStopping,

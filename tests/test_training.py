@@ -11,6 +11,7 @@ from deepgboost import (
     train,
     cv,
     EarlyStopping,
+    EvaluationMonitor,
 )
 
 
@@ -79,7 +80,7 @@ class TestTrainFunction:
         train(_PARAMS, dtrain, evals=[(dval, "val")], verbose_eval=2)
         captured = capsys.readouterr()
         # 5 layers, period=2 → print at layers 2 and 4
-        lines = [line for line in captured.out.strip().split("\n") if line]
+        lines = [l for l in captured.out.strip().split("\n") if l]
         assert len(lines) == 2
 
 

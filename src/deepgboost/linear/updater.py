@@ -30,11 +30,7 @@ class LinearUpdater:
         Whether to fit an intercept in the Ridge model.
     """
 
-    def __init__(
-        self,
-        alpha: float = 1.0,
-        fit_intercept: bool = True,
-    ):
+    def __init__(self, alpha: float = 1.0, fit_intercept: bool = True):
         self.alpha = alpha
         self.fit_intercept = fit_intercept
         self._ridge = Ridge(alpha=alpha, fit_intercept=fit_intercept)
@@ -61,10 +57,7 @@ class LinearUpdater:
         self._ridge.fit(X_sub, pseudo_y_mean_sub)
         return self
 
-    def predict(
-        self,
-        X: np.ndarray,
-    ) -> np.ndarray:
+    def predict(self, X: np.ndarray) -> np.ndarray:
         """
         Predict linear correction.
 
