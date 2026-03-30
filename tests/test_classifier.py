@@ -1,6 +1,10 @@
 """Tests for DeepGBoostClassifier (sklearn.py)."""
 
+import io
+import pickle
+
 import numpy as np
+import pandas as pd
 import pytest
 from sklearn.base import clone
 from sklearn.datasets import load_breast_cancer, load_iris
@@ -215,3 +219,160 @@ class TestDeepGBoostClassifierSklearnCompat:
         clf.fit(X_train, y_str_train)
         preds = clf.predict(X_test)
         assert set(np.unique(preds)).issubset({"class_a", "class_b", "class_c"})
+
+
+# ---------------------------------------------------------------------------
+# Categorical encoding
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def cat_binary_numpy():
+    """Binary classification dataset with one categorical column (numpy)."""
+    X = np.array([
+        ["red",   1.0],
+        ["blue",  2.0],
+        ["red",   1.5],
+        ["green", 2.5],
+        ["blue",  2.0],
+        ["green", 1.0],
+        ["red",   1.8],
+        ["blue",  2.3],
+    ], dtype=object)
+    y = np.array([0, 1, 0, 1, 1, 0, 0, 1])
+    return X, y
+
+
+@pytest.fixture
+def cat_multiclass_pandas():
+    """Multiclass classification dataset as a pandas DataFrame."""
+    X = pd.DataFrame({
+        "color":  ["red", "blue", "green", "red", "blue", "green",
+                   "red", "blue", "green", "red", "blue", "green"],
+        "weight": [1.0, 2.0, 3.0, 1.5, 2.5, 3.5,
+                   1.2, 2.2, 3.2, 1.8, 2.8, 3.8],
+    })
+    y = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2])
+    return X, y
+
+
+class TestDeepGBoostClassifierCategorical:
+
+    _CLF = DeepGBoostClassifier(n_trees=3, n_layers=5, random_state=0)
+
+    def test_numpy_detects_categorical_column(self, cat_binary_numpy):
+        X, y = cat_binary_numpy
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+        assert clf.categorical_columns_ == [0]
+        assert clf.numerical_columns_ == [1]
+
+    def test_pandas_detects_categorical_column(self, cat_multiclass_pandas):
+        X, y = cat_multiclass_pandas
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+        assert clf.categorical_columns_ == [0]
+        assert clf.numerical_columns_ == [1]
+
+    def test_ohe_is_fitted(self, cat_binary_numpy):
+        X, y = cat_binary_numpy
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+        assert clf.ohe_ is not None
+        assert set(clf.ohe_.categories_[0]) == {"red", "blue", "green"}
+
+    def test_no_encoder_when_all_numeric(self, binary_split):
+        X_train, _, y_train, _ = binary_split
+        clf = clone(self._CLF)
+        clf.fit(X_train, y_train)
+        assert clf.ohe_ is None
+        assert clf.categorical_columns_ == []
+
+    def test_binary_predict_shape(self, cat_binary_numpy):
+        X, y = cat_binary_numpy
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+        preds = clf.predict(X)
+        assert preds.shape == (len(y),)
+
+    def test_binary_predict_proba_valid(self, cat_binary_numpy):
+        X, y = cat_binary_numpy
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+        proba = clf.predict_proba(X)
+        assert proba.shape == (len(y), 2)
+        np.testing.assert_allclose(proba.sum(axis=1), 1.0, atol=1e-6)
+
+    def test_multiclass_predict_shape(self, cat_multiclass_pandas):
+        X, y = cat_multiclass_pandas
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+        preds = clf.predict(X)
+        assert preds.shape == (len(y),)
+
+    def test_multiclass_predict_proba_valid(self, cat_multiclass_pandas):
+        X, y = cat_multiclass_pandas
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+        proba = clf.predict_proba(X)
+        assert proba.shape == (len(y), 3)
+        np.testing.assert_allclose(proba.sum(axis=1), 1.0, atol=1e-6)
+
+    def test_pickle_preserves_encoder(self, cat_binary_numpy):
+        X, y = cat_binary_numpy
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+
+        buf = io.BytesIO()
+        pickle.dump(clf, buf)
+        buf.seek(0)
+        clf_loaded = pickle.load(buf)
+
+        assert clf_loaded.categorical_columns_ == clf.categorical_columns_
+        assert clf_loaded.numerical_columns_ == clf.numerical_columns_
+        assert clf_loaded.ohe_ is not None
+        np.testing.assert_array_equal(
+            clf_loaded.ohe_.categories_[0], clf.ohe_.categories_[0]
+        )
+
+    def test_pickle_identical_predictions_binary(self, cat_binary_numpy):
+        X, y = cat_binary_numpy
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+        preds_before = clf.predict(X)
+        proba_before = clf.predict_proba(X)
+
+        buf = io.BytesIO()
+        pickle.dump(clf, buf)
+        buf.seek(0)
+        clf_loaded = pickle.load(buf)
+
+        np.testing.assert_array_equal(preds_before, clf_loaded.predict(X))
+        np.testing.assert_array_equal(proba_before, clf_loaded.predict_proba(X))
+
+    def test_pickle_identical_predictions_multiclass(self, cat_multiclass_pandas):
+        X, y = cat_multiclass_pandas
+        clf = clone(self._CLF)
+        clf.fit(X, y)
+        preds_before = clf.predict(X)
+        proba_before = clf.predict_proba(X)
+
+        buf = io.BytesIO()
+        pickle.dump(clf, buf)
+        buf.seek(0)
+        clf_loaded = pickle.load(buf)
+
+        np.testing.assert_array_equal(preds_before, clf_loaded.predict(X))
+        np.testing.assert_array_equal(proba_before, clf_loaded.predict_proba(X))
+
+    def test_pickle_no_encoder_identical_predictions(self, binary_split):
+        X_train, X_test, y_train, _ = binary_split
+        clf = clone(self._CLF)
+        clf.fit(X_train, y_train)
+        preds_before = clf.predict(X_test)
+
+        buf = io.BytesIO()
+        pickle.dump(clf, buf)
+        buf.seek(0)
+        clf_loaded = pickle.load(buf)
+
+        np.testing.assert_array_equal(preds_before, clf_loaded.predict(X_test))
