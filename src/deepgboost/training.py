@@ -161,7 +161,9 @@ def cv(
 
     for fold_idx in range(nfold):
         val_idx = folds[fold_idx]
-        train_idx = np.concatenate([folds[i] for i in range(nfold) if i != fold_idx])
+        train_idx = np.concatenate(
+            [folds[i] for i in range(nfold) if i != fold_idx]
+        )
 
         dtrain_fold = DeepGBoostDMatrix(X[train_idx], label=y[train_idx])
         dval_fold = DeepGBoostDMatrix(X[val_idx], label=y[val_idx])

@@ -20,7 +20,11 @@ class DeepGBoostPredictor:
     a single predictor instance can be reused across multiple trained models.
     """
 
-    def predict_raw(self, model, X: np.ndarray) -> np.ndarray:
+    def predict_raw(
+        self,
+        model,
+        X: np.ndarray,
+    ) -> np.ndarray:
         """
         Compute raw (untransformed) ensemble predictions.
 
@@ -56,21 +60,25 @@ class DeepGBoostPredictor:
 
             for t, tree in enumerate(layer):
                 # tree.predict returns (n_samples, n_trees)
-                tree_out = tree.predict(X)          # (n_samples, n_trees)
-                w = layer_weights[t]                # (n_trees,)
+                tree_out = tree.predict(X)  # (n_samples, n_trees)
+                w = layer_weights[t]  # (n_trees,)
                 # Weighted combination → scalar per sample
-                tree_scalar = (tree_out * w).sum(axis=1)   # (n_samples,)
+                tree_scalar = (tree_out * w).sum(axis=1)  # (n_samples,)
                 accum[:, t] += tree_scalar
 
             if model.linear_projection and model.linear_models_:
                 lin = model.linear_models_[l]
-                lin_correction = lin.predict(X)     # (n_samples,)
+                lin_correction = lin.predict(X)  # (n_samples,)
                 # Broadcast linear correction to all tree slots
                 accum += lin_correction[:, np.newaxis] * lin.alpha_mix_
 
         return accum.mean(axis=1)
 
-    def predict_raw_per_slot(self, model, X: np.ndarray) -> np.ndarray:
+    def predict_raw_per_slot(
+        self,
+        model,
+        X: np.ndarray,
+    ) -> np.ndarray:
         """
         Return the full (n_samples, n_trees) accumulator without averaging.
 

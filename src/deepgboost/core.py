@@ -55,9 +55,7 @@ class DeepGBoostDMatrix:
 
         self.data: np.ndarray = np.asarray(data, dtype=np.float64)
         if self.data.ndim != 2:
-            raise ValueError(
-                f"data must be 2-D, got shape {self.data.shape}"
-            )
+            raise ValueError(f"data must be 2-D, got shape {self.data.shape}")
 
         self.label: np.ndarray | None = None
         if label is not None:
@@ -89,7 +87,9 @@ class DeepGBoostDMatrix:
         return self.data.shape[1]
 
     def __repr__(self) -> str:
-        label_str = f", label={self.label.shape}" if self.label is not None else ""
+        label_str = (
+            f", label={self.label.shape}" if self.label is not None else ""
+        )
         return (
             f"DeepGBoostDMatrix(shape={self.data.shape}{label_str}, "
             f"features={self.feature_names})"
@@ -121,12 +121,22 @@ class DeepGBoostBooster:
     """
 
     _PARAM_KEYS = {
-        "n_trees", "n_layers", "max_depth", "learning_rate",
-        "linear_projection", "linear_alpha", "subsample_min_frac",
-        "weight_solver", "objective", "random_state",
+        "n_trees",
+        "n_layers",
+        "max_depth",
+        "learning_rate",
+        "linear_projection",
+        "linear_alpha",
+        "subsample_min_frac",
+        "weight_solver",
+        "objective",
+        "random_state",
     }
 
-    def __init__(self, params: dict | None = None):
+    def __init__(
+        self,
+        params: dict | None = None,
+    ):
         self.params: dict = params or {}
         self._model: DGBFModel | None = None
 
@@ -156,7 +166,9 @@ class DeepGBoostBooster:
         if dtrain.label is None:
             raise ValueError("dtrain must have a label to train.")
 
-        model_params = {k: v for k, v in self.params.items() if k in self._PARAM_KEYS}
+        model_params = {
+            k: v for k, v in self.params.items() if k in self._PARAM_KEYS
+        }
         self._model = DGBFModel(**model_params)
 
         raw_evals = None
@@ -175,7 +187,10 @@ class DeepGBoostBooster:
         )
         return self
 
-    def predict(self, dtest: DeepGBoostDMatrix) -> np.ndarray:
+    def predict(
+        self,
+        dtest: DeepGBoostDMatrix,
+    ) -> np.ndarray:
         """
         Generate predictions.
 

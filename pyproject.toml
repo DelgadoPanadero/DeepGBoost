@@ -15,7 +15,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7", "pytest-cov", "matplotlib>=3.7"]
+dev = [
+    "pytest>=7",
+    "pytest-cov",
+    "matplotlib>=3.7",
+    "ruff>=0.15.8",
+]
 plotting = ["matplotlib>=3.7"]
 
 [tool.setuptools.packages.find]

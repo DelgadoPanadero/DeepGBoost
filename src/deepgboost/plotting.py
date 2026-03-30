@@ -76,7 +76,9 @@ def plot_importance(
         )
 
     if importances is None:
-        raise ValueError("Model has not been fitted or feature importances are None.")
+        raise ValueError(
+            "Model has not been fitted or feature importances are None."
+        )
 
     n_features = len(importances)
 
@@ -95,7 +97,9 @@ def plot_importance(
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
 
-    ax.barh(range(len(indices)), selected_scores, color=color, edgecolor="white")
+    ax.barh(
+        range(len(indices)), selected_scores, color=color, edgecolor="white"
+    )
     ax.set_yticks(range(len(indices)))
     ax.set_yticklabels(selected_names)
     ax.set_title(title)

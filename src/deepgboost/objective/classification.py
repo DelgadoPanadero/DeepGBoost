@@ -18,15 +18,25 @@ class LogisticObjective(BaseObjective):
     Prior: log(p_mean / (1 - p_mean))  (log-odds of the class rate)
     """
 
-    def gradient(self, y: np.ndarray, F: np.ndarray) -> np.ndarray:
+    def gradient(
+        self,
+        y: np.ndarray,
+        F: np.ndarray,
+    ) -> np.ndarray:
         return y - sigmoid(F)
 
-    def prior(self, y: np.ndarray) -> float:
+    def prior(
+        self,
+        y: np.ndarray,
+    ) -> float:
         p = float(y.mean())
         p = np.clip(p, 1e-7, 1 - 1e-7)
         return float(np.log(p / (1.0 - p)))
 
-    def transform(self, raw: np.ndarray) -> np.ndarray:
+    def transform(
+        self,
+        raw: np.ndarray,
+    ) -> np.ndarray:
         """Map log-odds to probabilities."""
         return sigmoid(raw)
 
@@ -43,7 +53,11 @@ class SoftmaxObjective(BaseObjective):
     with multi-output targets.
     """
 
-    def gradient(self, y: np.ndarray, F: np.ndarray) -> np.ndarray:
+    def gradient(
+        self,
+        y: np.ndarray,
+        F: np.ndarray,
+    ) -> np.ndarray:
         """
         Parameters
         ----------
@@ -52,13 +66,21 @@ class SoftmaxObjective(BaseObjective):
         """
         return y - softmax(F, axis=1)
 
-    def prior(self, y: np.ndarray) -> np.ndarray:
+    def prior(
+        self,
+        y: np.ndarray,
+    ) -> np.ndarray:
         """Log-odds prior for each class (shape n_classes)."""
         if y.ndim == 1:
-            raise ValueError("SoftmaxObjective requires one-hot encoded y (2-D).")
+            raise ValueError(
+                "SoftmaxObjective requires one-hot encoded y (2-D)."
+            )
         p = y.mean(axis=0)
         p = np.clip(p, 1e-7, 1 - 1e-7)
         return np.log(p / (1.0 - p))
 
-    def transform(self, raw: np.ndarray) -> np.ndarray:
+    def transform(
+        self,
+        raw: np.ndarray,
+    ) -> np.ndarray:
         return softmax(raw, axis=1)

@@ -1,7 +1,12 @@
 from .regression import RMSEObjective, MAEObjective
 from .classification import LogisticObjective, SoftmaxObjective
 
-__all__ = ["RMSEObjective", "MAEObjective", "LogisticObjective", "SoftmaxObjective"]
+__all__ = [
+    "RMSEObjective",
+    "MAEObjective",
+    "LogisticObjective",
+    "SoftmaxObjective",
+]
 
 OBJECTIVES: dict[str, type] = {
     "reg:squarederror": RMSEObjective,
