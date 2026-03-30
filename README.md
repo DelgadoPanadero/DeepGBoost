@@ -71,16 +71,18 @@ $$F_i(x) = \sum_{l=1}^{L} RF_l(x) = \frac{1}{T} \sum_{l=0}^{L} \sum_{t=0}^{T} h_
 where *L* is the number of boosting layers and *T* is the number of trees per layer. This structure is a direct analogue of a **Dense Neural Network**, where each RandomForest layer corresponds to a network layer, with distributed gradients replacing back-propagation.
 
 
-<div align="center"><img src="doc/fig1.png" width="80%"></div>
-
-<div align="center" style="width:80%; margin:auto;"><strong>Fig. 1</strong> — <strong>NeuralNetwork vs DGBF architecture</strong>: In NN (left), each neuron's output feeds into the next layer via back-propagation. In DGBF (right), the distributed gradients of all trees from each layer are forwarded to every tree of the following layer.</div>
+<div align="center" style="width:80%; margin:auto;">
+<img src="doc/fig1.png" width="100%">
+<p><strong>Fig. 1</strong> — <strong>NeuralNetwork vs DGBF architecture</strong>: In NN (left), each neuron's output feeds into the next layer via back-propagation. In DGBF (right), the distributed gradients of all trees from each layer are forwarded to every tree of the following layer.</p>
+</div>
 
 Both RandomForest and GradientBoosting emerge naturally as special cases of DGBF: RandomForest is recovered with a single layer (*L* = 1) and GradientBoosting with a single tree per layer (*T* = 1).
 
 
-<div align="center"><img src="doc/fig2.png" width="80%"></div>
-
-<div align="center" style="width:80%; margin:auto;"><strong>Fig. 2</strong> — <strong>RandomForest & GradientBoosting as DGBF special cases</strong>: RandomForest (left) and GradientBoosting (right) represented as particular graph architectures of DGBF.</div>
+<div align="center" style="width:80%; margin:auto;">
+<img src="doc/fig2.png" width="100%">
+<p><strong>Fig. 2</strong> — <strong>RandomForest & GradientBoosting as DGBF special cases</strong>: RandomForest (left) and GradientBoosting (right) represented as particular graph architectures of DGBF.</p>
+</div>
 
 ### 📊 Benchmark
 
