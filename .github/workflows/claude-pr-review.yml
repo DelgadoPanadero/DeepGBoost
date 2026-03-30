@@ -11,7 +11,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +19,8 @@ jobs:
 
       - uses: anthropics/claude-code-action@v1
         with:
-          prompt: |
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          direct_prompt: |
             Review this pull request focusing on:
             - Correctness of the algorithm and math
             - Test coverage for new functionality
