@@ -1,72 +1,24 @@
 import json
 
+_MODEL_KEYS = {"module", "object", "parameters"}
+_EXPERIMENT_KEYS = {"module", "object", "parameters"}
+_DATASET_REQUIRED_KEYS = {"name", "url", "function", "file"}
+
 
 class ConfigParser:
-    CONFIG_SCHEMA = {
-        "Description": str,
-        "Models": {
-            "model_1": {
-                "module": str,
-                "object": str,
-                "parameters": dict,
-            },
-            "model_2": {
-                "module": str,
-                "object": str,
-                "parameters": dict,
-            },
-            "model_3": {
-                "module": str,
-                "object": str,
-                "parameters": dict,
-            },
-        },
-        "Experiments": [
-            {
-                "module": str,
-                "object": str,
-                "parameters": dict,
-            },
-        ],
-        "Datasets": [
-            {
-                "name": str,
-                "url": str,
-                "sep": str,
-                "function": str,
-                "file": str,
-            },
-        ],
-    }
 
-    def __init__(
-        self,
-        config_file="config.json",
-    ):
-
+    def __init__(self, config_file="config.json"):
         try:
             with open(config_file) as file:
                 config = json.load(file)
-
-        except Exception as error:
+        except Exception:
             raise Exception(f"{config_file} has not a proper json structure")
 
         try:
-            self._check_json_schema(config)
-
-        except Exception as error:
+            self._validate(config)
+        except Exception:
             raise Exception(
-                f"Error {config_file} does not follow the"
-                + "expected json schema"
-            )
-
-        try:
-            self._check_json_types(config)
-
-        except Exception as error:
-            raise Exception(
-                f"Error {config_file} fields does not has the"
-                + "expected value types"
+                f"{config_file} does not follow the expected json schema"
             )
 
         self._config = config
@@ -75,55 +27,27 @@ class ConfigParser:
     def config(self):
         return self._config
 
-    def _check_json_schema(self, config):
+    def _validate(self, config):
+        assert {"Description", "Models", "Experiments", "Datasets"} <= config.keys()
 
-        schema = self.CONFIG_SCHEMA
+        assert isinstance(config["Models"], dict) and len(config["Models"]) > 0
+        for model_cfg in config["Models"].values():
+            assert model_cfg.keys() == _MODEL_KEYS
+            assert isinstance(model_cfg["module"], str)
+            assert isinstance(model_cfg["object"], str)
+            assert isinstance(model_cfg["parameters"], dict)
 
-        assert config.keys() == schema.keys()
+        assert isinstance(config["Experiments"], list) and len(config["Experiments"]) > 0
+        for exp in config["Experiments"]:
+            assert exp.keys() == _EXPERIMENT_KEYS
+            assert isinstance(exp["module"], str)
+            assert isinstance(exp["object"], str)
+            assert isinstance(exp["parameters"], dict)
 
-        assert config["Models"].keys() == schema["Models"].keys()
-
-        assert (
-            config["Models"]["model_1"].keys()
-            == schema["Models"]["model_1"].keys()
-        )
-
-        assert (
-            config["Models"]["model_2"].keys()
-            == schema["Models"]["model_2"].keys()
-        )
-
-        assert all(
-            experiment.keys() == schema["Experiments"][0].keys()
-            for experiment in config["Experiments"]
-        )
-
-        assert all(
-            schema["Datasets"][0].keys() <= dataset.keys()
-            for dataset in config["Datasets"]
-        )
-
-    def _check_json_types(self, config):
-
-        schema = self.CONFIG_SCHEMA
-
-        assert all(
-            type(val) == schema["Models"]["model_1"][key]
-            for key, val in config["Models"]["model_1"].items()
-        )
-
-        assert all(
-            type(val) == schema["Models"]["model_2"][key]
-            for key, val in config["Models"]["model_2"].items()
-        )
-
-        for experiment in config["Experiments"]:
-            assert (
-                type(val) == schema["Experiments"][0][key]
-                for key, val in experiment
-            )
-
+        assert isinstance(config["Datasets"], list) and len(config["Datasets"]) > 0
         for dataset in config["Datasets"]:
-            assert (
-                type(val) == schema["Datasets"][0][key] for key, val in dataset
-            )
+            assert _DATASET_REQUIRED_KEYS <= dataset.keys()
+            assert isinstance(dataset["name"], str)
+            assert isinstance(dataset["url"], str)
+            assert isinstance(dataset["function"], str)
+            assert isinstance(dataset["file"], str)

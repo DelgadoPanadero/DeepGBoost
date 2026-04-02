@@ -1,4 +1,7 @@
-Model 1 Score: 0.8994454804876154 +- 0.00707052100055781
-Model 2 Score: 0.8954467767671265 +- 0.02733439305788182
-Model 3 Score: 0.9311577875354505 +- 0.019491279108085575
-Differences: 0.03171230704783497 +- 0.016601801369092395Differences: 0.03571101076832406 +- 0.009138335407078105
+GradientBoosting Score: 0.9063 +- 0.0072
+RandomForest Score: 0.9102 +- 0.0108
+XGBoost Score: 0.9275 +- 0.0086
+DeepGBoost Score: 0.9393 +- 0.0115
+Difference (DeepGBoost - GradientBoosting): 0.0330 +- 0.0053
+Difference (DeepGBoost - RandomForest): 0.0291 +- 0.0081
+Difference (DeepGBoost - XGBoost): 0.0118 +- 0.0039

@@ -2,22 +2,29 @@
   "Description": "",
   "Models": {
     "model_1": {
-      "module": "sklearn.ensemble",
-      "object": "GradientBoostingRegressor",
+      "module": "benchmark.models",
+      "object": "GradientBoostingModel",
       "parameters": {
         "n_estimators": 100
       }
     },
     "model_2": {
-      "module": "sklearn.ensemble",
-      "object": "RandomForestRegressor",
+      "module": "benchmark.models",
+      "object": "RandomForestModel",
       "parameters": {
         "n_estimators": 100
       }
     },
-      "model_3": {
-      "module": "deepgboost",
-      "object": "DeepGBoostRegressor",
+    "model_3": {
+      "module": "benchmark.models",
+      "object": "XGBoostModel",
+      "parameters": {
+        "n_estimators": 100
+      }
+    },
+    "model_4": {
+      "module": "benchmark.models",
+      "object": "DeepGBoostModel",
       "parameters": {
         "n_layers": 5,
         "learning_rate": 0.8,

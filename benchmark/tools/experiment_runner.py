@@ -63,7 +63,7 @@ class ExperimentRunner:
             object = experiment["object"]
             params = experiment["parameters"]
 
-            params.update(self._models)
+            params["models"] = list(self._models.values())
 
             experiments[object] = getattr(import_module(module), object)(
                 **params
