@@ -160,20 +160,11 @@
       "task": "regression"
     },
     {
-      "name": "Temperature",
-      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00514/Bias_correction_ucl.csv",
-      "function": "read_csv",
-      "file": "data/Bias_correction_ucl.csv",
-      "sep": "\\s+",
-      "task": "regression"
-    },
-    {
-      "name": "Superconduct",
-      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00464/superconduct.zip",
-      "function": "read_csv",
-      "file": "data/superconduct.csv",
+      "name": "Concrete",
+      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls",
+      "function": "read_excel",
+      "file": "data/concrete.csv",
       "sep": ",",
-      "zip_entry": "train.csv",
       "task": "regression"
     }
   ]
