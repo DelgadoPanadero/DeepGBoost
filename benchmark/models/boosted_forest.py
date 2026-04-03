@@ -1,11 +1,14 @@
+import copy
+
 import numpy as np
 from scipy.optimize import minimize
 from sklearn.metrics import mean_squared_error
-from .abstract_forest import AbstractForestRegressor
+from sklearn.tree import DecisionTreeRegressor
+
+from .abstract_model import AbstractModel
 
 
-class BoostedForest(AbstractForestRegressor):
-
+class BoostedForest(AbstractModel):
 
     def __init__(
         self,
@@ -19,6 +22,13 @@ class BoostedForest(AbstractForestRegressor):
         self.max_depth     = max_depth
         self.learning_rate = learning_rate
 
+    @property
+    def name(self) -> str:
+        return "BoostedForest"
+
+    @property
+    def _base_model(self):
+        return copy.deepcopy(DecisionTreeRegressor(max_depth=self.max_depth))
 
     def _bootstrap_sample(self, X, pseudo_y, l, t):
 
@@ -165,4 +175,3 @@ class BoostedForest(AbstractForestRegressor):
         """
 
         return self._predict_stage(X).mean(axis=1)
-

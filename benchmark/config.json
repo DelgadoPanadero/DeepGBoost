@@ -59,9 +59,9 @@
       "object": "DeepGBoostClassifierModel",
       "parameters": {
         "n_layers": 50,
-        "learning_rate": 0.05,
+        "learning_rate": 0.3,
         "n_trees": 2,
-        "subsample_min_frac": 0.6
+        "subsample_min_frac": 0.3
       }
     }
   },
@@ -71,8 +71,8 @@
       "object": "BootstrapModelTest",
       "task": "regression",
       "parameters": {
-        "n_runs": 5,
-        "n_bins": 5
+        "n_runs": 100,
+        "n_bins": 20
       }
     },
     {
@@ -80,8 +80,8 @@
       "object": "ClassificationBootstrapTest",
       "task": "classification",
       "parameters": {
-        "n_runs": 5,
-        "n_bins": 5
+        "n_runs": 100,
+        "n_bins": 20
       }
     }
   ],
