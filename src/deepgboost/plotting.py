@@ -31,7 +31,7 @@ def plot_importance(
 
     Parameters
     ----------
-    model : DGBFModel, DeepGBoostBooster, DeepGBoostRegressor, or DeepGBoostClassifier
+    model : DGBFModel, DeepGBoostRegressor, or DeepGBoostClassifier
         Any fitted DeepGBoost object with a ``feature_importances_`` attribute.
     max_features : int
         Maximum number of features to display (sorted by importance).

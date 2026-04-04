@@ -45,7 +45,7 @@ predictions = model.predict(X_test)
 
 Detailed usage examples are available in the [examples/](examples/) directory:
 
-- [quickstart.ipynb](examples/quickstart.ipynb) — full tour of the API (regression, classification, functional API, callbacks, feature importances)
+- [quickstart.ipynb](examples/quickstart.ipynb) — full tour of the API (regression, classification, callbacks, feature importances)
 - [classifier.ipynb](examples/classifier.ipynb) — binary and multiclass classification walkthrough
 - [regressor.ipynb](examples/regressor.ipynb) — regression walkthrough
 - [serialization.ipynb](examples/serialization.ipynb) — saving and loading trained models with pickle

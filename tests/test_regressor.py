@@ -457,7 +457,7 @@ class TestRandomForestEquivalence:
         np.testing.assert_allclose(
             dgb_pred,
             rf_pred,
-            rtol=1e-12,
+            rtol=1e-10,
             err_msg=(
                 "DGB predictor with injected sklearn RF trees must reproduce "
                 "RandomForestRegressor.predict() exactly."

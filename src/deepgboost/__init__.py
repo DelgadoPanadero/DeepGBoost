@@ -19,21 +19,8 @@ Sklearn API::
     reg = DeepGBoostRegressor(n_layers=20, n_trees=10, learning_rate=0.05)
     reg.fit(X_train, y_train)
     preds = reg.predict(X_test)
-
-Functional API (mirrors XGBoost)::
-
-    import deepgboost as dgb
-
-    dtrain = dgb.DeepGBoostDMatrix(X_train, label=y_train)
-    dval   = dgb.DeepGBoostDMatrix(X_val,   label=y_val)
-
-    params = {"n_layers": 20, "objective": "reg:squarederror"}
-    bst = dgb.train(params, dtrain, evals=[(dval, "val")], verbose_eval=5)
-    preds = bst.predict(dgb.DeepGBoostDMatrix(X_test))
 """
 
-from .core import DeepGBoostDMatrix, DeepGBoostBooster
-from .training import train, cv
 from .deepgboost_regressor import DeepGBoostRegressor
 from .deepgboost_classifier import DeepGBoostClassifier
 from .callback import (
@@ -50,12 +37,6 @@ from .metric import get_metric
 __version__ = "0.1.0"
 
 __all__ = [
-    # Core data / model objects
-    "DeepGBoostDMatrix",
-    "DeepGBoostBooster",
-    # Functional API
-    "train",
-    "cv",
     # Sklearn estimators
     "DeepGBoostRegressor",
     "DeepGBoostClassifier",
