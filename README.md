@@ -5,7 +5,7 @@
 
 Machine Learning algorithm based on gradient boosting forest that merges the power of tree ensembles with neural network architectures.
 
-<div align="center"><img src="./doc/icon.svg" width="50%"></div>
+<div align="center"><img src="./doc/icon.svg" width="80%"></div>
 
 ## ⚙️ Installation
 

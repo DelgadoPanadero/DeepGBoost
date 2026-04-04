@@ -1,23 +1,30 @@
 {
   "Description": "",
-  "Models": {
+  "RegressionModels": {
     "model_1": {
-      "module": "sklearn.ensemble",
-      "object": "GradientBoostingRegressor",
+      "module": "benchmark.models",
+      "object": "GradientBoostingModel",
       "parameters": {
         "n_estimators": 100
       }
     },
     "model_2": {
-      "module": "sklearn.ensemble",
-      "object": "RandomForestRegressor",
+      "module": "benchmark.models",
+      "object": "RandomForestModel",
       "parameters": {
         "n_estimators": 100
       }
     },
-      "model_3": {
-      "module": "deepgboost",
-      "object": "DeepGBoostRegressor",
+    "model_3": {
+      "module": "benchmark.models",
+      "object": "XGBoostModel",
+      "parameters": {
+        "n_estimators": 100
+      }
+    },
+    "model_4": {
+      "module": "benchmark.models",
+      "object": "DeepGBoostModel",
       "parameters": {
         "n_layers": 5,
         "learning_rate": 0.8,
@@ -25,79 +32,140 @@
       }
     }
   },
+  "ClassificationModels": {
+    "model_1": {
+      "module": "benchmark.models",
+      "object": "GradientBoostingClassifierModel",
+      "parameters": {
+        "n_estimators": 100
+      }
+    },
+    "model_2": {
+      "module": "benchmark.models",
+      "object": "RandomForestClassifierModel",
+      "parameters": {
+        "n_estimators": 100
+      }
+    },
+    "model_3": {
+      "module": "benchmark.models",
+      "object": "XGBoostClassifierModel",
+      "parameters": {
+        "n_estimators": 100
+      }
+    },
+    "model_4": {
+      "module": "benchmark.models",
+      "object": "DeepGBoostClassifierModel",
+      "parameters": {
+        "n_layers": 50,
+        "learning_rate": 0.3,
+        "n_trees": 2,
+        "subsample_min_frac": 0.3
+      }
+    }
+  },
   "Experiments": [
     {
-      "module": "src.experiments",
+      "module": "benchmark.experiments.bootstrap_test",
       "object": "BootstrapModelTest",
+      "task": "regression",
       "parameters": {
-        "n_runs": 200,
-        "n_bins": 50
+        "n_runs": 100,
+        "n_bins": 20
+      }
+    },
+    {
+      "module": "benchmark.experiments.classification_bootstrap_test",
+      "object": "ClassificationBootstrapTest",
+      "task": "classification",
+      "parameters": {
+        "n_runs": 100,
+        "n_bins": 20
       }
     }
   ],
   "Datasets": [
     {
+      "name": "BankMarketing",
+      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00222/bank.zip",
+      "function": "read_csv",
+      "file": "data/bank_full.csv",
+      "sep": ";",
+      "zip_entry": "bank-full.csv",
+      "categorical_columns": ["job", "marital", "education", "default", "housing", "loan", "contact", "month", "poutcome"],
+      "task": "classification"
+    },
+    {
+      "name": "Abalone",
+      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data",
+      "function": "read_csv",
+      "file": "data/abalone.csv",
+      "sep": ",",
+      "column_names": ["sex", "length", "diameter", "height", "whole_weight", "shucked_weight", "viscera_weight", "shell_weight", "rings"],
+      "categorical_columns": ["sex"],
+      "task": "regression"
+    },
+    {
+      "name": "Adult",
+      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data",
+      "function": "read_csv",
+      "file": "data/adult.csv",
+      "sep": ",",
+      "skipinitialspace": true,
+      "column_names": ["age", "workclass", "fnlwgt", "education", "education_num", "marital_status", "occupation", "relationship", "race", "sex", "capital_gain", "capital_loss", "hours_per_week", "native_country", "income"],
+      "drop_columns": ["fnlwgt"],
+      "categorical_columns": ["workclass", "education", "marital_status", "occupation", "relationship", "race", "sex", "native_country"],
+      "task": "classification"
+    },
+    {
+      "name": "Penguins",
+      "url": "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/main/inst/extdata/penguins.csv",
+      "function": "read_csv",
+      "file": "data/penguins.csv",
+      "sep": ",",
+      "target_column": "species",
+      "drop_columns": ["year"],
+      "categorical_columns": ["island", "sex"],
+      "dropna": true,
+      "task": "classification"
+    },
+    {
       "name": "NavalVessel",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00316/UCI%20CBM%20Dataset.zip",
       "function": "read_csv",
       "file": "data/UCI_CBM_Dataset.csv",
-      "sep": ","
+      "sep": "\\s+",
+      "zip_entry": "UCI CBM Dataset/data.txt",
+      "task": "regression"
     },
     {
-      "name": "Cargo2000",
-      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00382/c2k_data_comma.csv",
+      "name": "CaliforniaHousing",
+      "url": "https://raw.githubusercontent.com/ageron/handson-ml2/master/datasets/housing/housing.csv",
       "function": "read_csv",
-      "file": "data/c2k_data_comma.csv",
-      "sep": ","
+      "file": "data/california_housing.csv",
+      "sep": ",",
+      "target_column": "median_house_value",
+      "categorical_columns": ["ocean_proximity"],
+      "dropna": true,
+      "task": "regression"
     },
     {
       "name": "BikeSales",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00560/SeoulBikeData.csv",
       "function": "read_csv",
       "file": "data/SeoulBikeData.csv",
-      "sep": ","
-    },
-    {
-      "name": "Temperature",
-      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00514/Bias_correction_ucl.csv",
-      "function": "read_csv",
-      "file": "data/Bias_correction_ucl.csv",
-      "sep": "\\s+"
-    },
-    {
-      "name": "Superconduct",
-      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00464/superconduct.zip",
-      "function": "read_csv",
-      "file": "data/superconduct.csv",
-      "sep": ","
-    },
-    {
-      "name": "Wine",
-      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv",
-      "function": "read_csv",
-      "file": "data/wine_red.csv",
-      "sep": ";"
+      "sep": ",",
+      "encoding": "latin-1",
+      "task": "regression"
     },
     {
       "name": "Concrete",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls",
       "function": "read_excel",
       "file": "data/concrete.csv",
-      "sep": ","
-    },
-    {
-      "name": "Parkinson",
-      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/parkinsons/telemonitoring/parkinsons_updrs.data",
-      "function": "read_csv",
-      "file": "data/parkinson.csv",
-      "sep": ","
-    },
-    {
-      "name": "Obesity",
-      "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00316/UCI%20CBM%20Dataset.zip",
-      "function": "read_csv",
-      "file": "data/ObesityDataSet_raw_and_data_sinthetic.csv",
-      "sep": ","
+      "sep": ",",
+      "task": "regression"
     }
   ]
 }

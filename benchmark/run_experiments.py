@@ -1,9 +1,11 @@
+import os
 from .tools import ConfigParser
 from .tools import ExperimentRunner
 
 
 if __name__ == "__main__":
-    config_parser = ConfigParser("config.json")
+    config_path = os.path.join(os.path.dirname(__file__), "config.json")
+    config_parser = ConfigParser(config_path)
     config = config_parser.config
 
     runner = ExperimentRunner(config)

@@ -1,12 +1,12 @@
 import numpy as np
 from tqdm import tqdm
-from sklearn.metrics import r2_score
+from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 
 from .abstract_test import AbstractModelTest
 
 
-class BootstrapModelTest(AbstractModelTest):
+class ClassificationBootstrapTest(AbstractModelTest):
     def __init__(
         self,
         models,
@@ -19,13 +19,17 @@ class BootstrapModelTest(AbstractModelTest):
         self._n_bins = n_bins
         self._test_size = test_size
 
+    @property
+    def metric_name(self) -> str:
+        return "Weighted F1"
+
     def score(self, y_test, y_pred):
-        return r2_score(y_test, y_pred)
+        return f1_score(y_test, y_pred, average="weighted", zero_division=0)
 
     def create_batch(self, X, y):
         for _ in tqdm(range(self._n_runs)):
             X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=self._test_size
+                X, y, test_size=self._test_size, stratify=y
             )
             yield X_train, y_train, X_test, y_test
 
