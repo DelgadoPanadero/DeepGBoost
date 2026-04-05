@@ -40,9 +40,9 @@ __all__ = [
     "DeepGBoostClassifier",
     # Callbacks
     "TrainingCallback",
-    "EarlyStopping",
-    "LearningRateScheduler",
-    "EvaluationMonitor",
+    "EarlyStoppingCallback",
+    "LearningRateSchedulerCallback",
+    "EvaluationMonitorCallback",
     # Plotting
     "plot_importance",
     # Low-level

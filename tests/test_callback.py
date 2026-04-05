@@ -226,7 +226,7 @@ class TestEvaluationMonitor:
     def test_monitor_silent_without_evals(self, diabetes_split, capsys):
         X_train, _, y_train, _ = diabetes_split
         monitor = EvaluationMonitorCallback(period=1)
-        model = DGBFModel(
+        DGBFModel(
             n_trees=3,
             n_layers=3,
             random_state=0,
