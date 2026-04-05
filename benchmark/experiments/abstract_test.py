@@ -1,3 +1,4 @@
+import json
 import os
 import abc
 
@@ -50,23 +51,15 @@ class AbstractModelTest:
     def _save_scores(self, name, scores_dict):
         model_names = list(scores_dict.keys())
         reference = model_names[-1]
-
-        diff_headers = [f"diff_{reference}_vs_{n}" for n in model_names[:-1]]
-        header = ", ".join(model_names) + ", " + ", ".join(diff_headers)
-
-        rows = []
         score_arrays = list(scores_dict.values())
-        for values in zip(*score_arrays):
-            diffs = [values[-1] - v for v in values[:-1]]
-            rows.append(
-                ", ".join(f"{v}" for v in values)
-                + ", "
-                + ", ".join(f"{d}" for d in diffs)
-            )
 
-        file_name = f"{BENCHMARK_DIR}/results/{name.replace(' ', '_').lower()}_scores.csv"
+        file_name = f"{BENCHMARK_DIR}/results/{name.replace(' ', '_').lower()}_scores.jsonl"
         with open(file_name, "w") as file:
-            file.write(header + "\n" + "\n".join(rows) + "\n")
+            for values in zip(*score_arrays):
+                record = {n: float(v) for n, v in zip(model_names, values)}
+                for n, v in zip(model_names[:-1], values[:-1]):
+                    record[f"diff_{reference}_vs_{n}"] = float(values[-1]) - float(v)
+                file.write(json.dumps(record) + "\n")
 
     def _plot_scores(self, name, scores_dict, n_bins):
         all_scores = np.concatenate(list(scores_dict.values()))
