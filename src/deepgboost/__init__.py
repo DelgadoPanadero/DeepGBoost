@@ -23,12 +23,10 @@ Sklearn API::
 
 from .deepgboost_regressor import DeepGBoostRegressor
 from .deepgboost_classifier import DeepGBoostClassifier
-from .callback import (
-    TrainingCallback,
-    EarlyStopping,
-    LearningRateScheduler,
-    EvaluationMonitor,
-)
+from .callbacks import TrainingCallback
+from .callbacks import EarlyStoppingCallback
+from .callbacks import LearningRateSchedulerCallback
+from .callbacks import EvaluationMonitorCallback
 from .plotting import plot_importance
 from .gbm.dgbf import DGBFModel
 from .objective import get_objective

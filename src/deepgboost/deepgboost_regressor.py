@@ -21,7 +21,7 @@ from sklearn.base import RegressorMixin
 from sklearn.utils.validation import check_is_fitted
 
 from .gbm.dgbf import DGBFModel
-from .callback import TrainingCallback
+from .callbacks.base_callback import TrainingCallback
 from .common.categorical import CategoricalEncoderMixin
 
 
@@ -37,7 +37,9 @@ _CALLBACK_PARAMS = ("early_stopping_rounds", "eval_metric")
 
 
 class DeepGBoostRegressor(
-    CategoricalEncoderMixin, BaseEstimator, RegressorMixin
+    CategoricalEncoderMixin,
+    BaseEstimator,
+    RegressorMixin,
 ):
     """
     DeepGBoost regressor — sklearn-compatible interface.
@@ -179,13 +181,18 @@ class DeepGBoostRegressor(
                 for i, (Xv, yv) in enumerate(eval_set)
             ]
             if self.early_stopping_rounds is not None:
-                from .callback import EarlyStopping
+                from .callbacks import EarlyStopping
 
                 all_callbacks.append(
                     EarlyStopping(patience=self.early_stopping_rounds)
                 )
 
-        self.model_.fit(X, y, callbacks=all_callbacks, evals=raw_evals)
+        self.model_.fit(
+            X=X,
+            y=y,
+            callbacks=all_callbacks,
+            evals=raw_evals,
+        )
         self.n_features_in_ = X.shape[1]
         return self
 

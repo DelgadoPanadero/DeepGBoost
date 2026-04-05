@@ -21,7 +21,7 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.preprocessing import LabelEncoder
 
 from .gbm.dgbf import DGBFModel
-from .callback import TrainingCallback
+from .callbacks.base_callback import TrainingCallback
 from .common.utils import sigmoid, softmax
 from .common.categorical import CategoricalEncoderMixin
 
@@ -177,7 +177,7 @@ class DeepGBoostClassifier(
 
         all_callbacks = list(callbacks or [])
         if self.early_stopping_rounds is not None and eval_set:
-            from .callback import EarlyStopping
+            from .callbacks.base_callback import EarlyStopping
 
             all_callbacks.append(
                 EarlyStopping(patience=self.early_stopping_rounds)
@@ -186,7 +186,7 @@ class DeepGBoostClassifier(
         if n_classes == 2:
             # Binary classification
             self._binary_model = self._fit_binary(
-                X, y_enc.astype(np.float64), eval_set, all_callbacks, model_kw
+                X, y_enc.astype(np.float64), eval_set, all_callbacks, model_kw,
             )
         else:
             # Multiclass: one-vs-rest

@@ -26,7 +26,7 @@ from ..objective.regression import BaseObjective
 from ..predictor.predictor import DeepGBoostPredictor
 
 if TYPE_CHECKING:
-    from ..callback import TrainingCallback
+    from ..callbacks.base_callback import TrainingCallback
 
 
 class DGBFModel:
@@ -302,11 +302,11 @@ class DGBFModel:
         for t in range(self.n_trees):
             # Dynamic bootstrap subsample (paper sec. 3.1.3)
             sample_idx = bootstrap_sampler(
-                n_samples,
-                self.n_layers,
-                layer_idx,
-                self.subsample_min_frac,
-                rng,
+                n_samples=n_samples,
+                n_layers=self.n_layers,
+                layer_idx=layer_idx,
+                subsample_min_frac=self.subsample_min_frac,
+                rng=rng,
             )
 
             # Derive per-tree seed from master rng
@@ -327,7 +327,9 @@ class DGBFModel:
 
         # Single weight vector for the layer (paper eq. 11)
         layer_weights = weight_solver(
-            all_preds, pseudo_y, method=self.weight_solver
+            all_preds,
+            pseudo_y,
+            method=self.weight_solver,
         )
 
         return new_layer, layer_weights

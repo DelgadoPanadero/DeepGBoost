@@ -5,13 +5,11 @@ import pytest
 from sklearn.datasets import load_diabetes
 from sklearn.model_selection import train_test_split
 
-from deepgboost import (
-    DeepGBoostRegressor,
-    EarlyStopping,
-    LearningRateScheduler,
-    EvaluationMonitor,
-    TrainingCallback,
-)
+from deepgboost import TrainingCallback
+from deepgboost import DeepGBoostRegressor
+from deepgboost.callbacks import EarlyStoppingCallback
+from deepgboost.callbacks import EvaluationMonitorCallback
+from deepgboost.callbacks import LearningRateSchedulerCallback
 from deepgboost.gbm.dgbf import DGBFModel
 
 
@@ -53,8 +51,11 @@ class TestTrainingCallbackBase:
 class TestEarlyStopping:
     def test_stops_when_no_improvement_unit(self):
         """Unit test: EarlyStopping returns True after patience exhausted."""
-        es = EarlyStopping(
-            patience=3, metric="train_loss", data="val", restore_best=False
+        es = EarlyStoppingCallback(
+            patience=3,
+            metric="train_loss",
+            data="val",
+            restore_best=False,
         )
 
         class FakeModel:
@@ -84,8 +85,16 @@ class TestEarlyStopping:
                 layers_run.append(epoch)
                 return epoch >= 4  # stop after layer 5 (0-indexed)
 
-        model = DGBFModel(n_trees=3, n_layers=20, random_state=0)
-        model.fit(X_train, y_train, callbacks=[StopAtEpoch5()])
+        model = DGBFModel(
+            n_trees=3,
+            n_layers=20,
+            random_state=0,
+        )
+        model.fit(
+            X_train,
+            y_train,
+            callbacks=[StopAtEpoch5()],
+        )
 
         assert len(layers_run) == 5, (
             f"Training should have stopped at layer 5, ran {len(layers_run)}"
@@ -93,7 +102,7 @@ class TestEarlyStopping:
 
     def test_restore_best_restores_model(self, diabetes_split):
         X_train, X_val, y_train, y_val = diabetes_split
-        es = EarlyStopping(patience=3, restore_best=True)
+        es = EarlyStoppingCallback(patience=3, restore_best=True)
         reg = DeepGBoostRegressor(
             n_trees=3,
             n_layers=20,
@@ -101,14 +110,19 @@ class TestEarlyStopping:
             learning_rate=0.05,
             random_state=1,
         )
-        reg.fit(X_train, y_train, eval_set=[(X_val, y_val)], callbacks=[es])
+        reg.fit(
+            X_train,
+            y_train,
+            eval_set=[(X_val, y_val)],
+            callbacks=[es],
+        )
         # Model should still be able to predict after restore
         preds = reg.predict(X_val)
         assert np.all(np.isfinite(preds))
 
     def test_no_eval_set_does_not_stop(self, diabetes_split):
         X_train, _, y_train, _ = diabetes_split
-        es = EarlyStopping(patience=3)
+        es = EarlyStoppingCallback(patience=3)
         layers_run = []
 
         class Counter(TrainingCallback):
@@ -116,8 +130,16 @@ class TestEarlyStopping:
                 layers_run.append(epoch)
                 return False
 
-        reg = DeepGBoostRegressor(n_trees=3, n_layers=5, random_state=0)
-        reg.fit(X_train, y_train, callbacks=[es, Counter()])
+        reg = DeepGBoostRegressor(
+            n_trees=3,
+            n_layers=5,
+            random_state=0,
+        )
+        reg.fit(
+            X_train,
+            y_train,
+            callbacks=[es, Counter()],
+        )
         assert len(layers_run) == 5
 
 
@@ -138,11 +160,19 @@ class TestLearningRateScheduler:
                 return False
 
         # Decay by 10% each layer
-        scheduler = LearningRateScheduler(lambda epoch: 0.1 * (0.9**epoch))
+        scheduler = LearningRateSchedulerCallback(lambda epoch: 0.1 * (0.9**epoch))
         recorder = LRRecorder()
 
-        model = DGBFModel(n_trees=3, n_layers=5, random_state=0)
-        model.fit(X_train, y_train, callbacks=[scheduler, recorder])
+        model = DGBFModel(
+            n_trees=3,
+            n_layers=5,
+            random_state=0,
+        )
+        model.fit(
+            X_train,
+            y_train,
+            callbacks=[scheduler, recorder],
+        )
 
         # Learning rate should decrease each layer (scheduler runs before recorder)
         assert len(rates_seen) == 5
@@ -154,9 +184,17 @@ class TestLearningRateScheduler:
 
     def test_constant_schedule(self, diabetes_split):
         X_train, _, y_train, _ = diabetes_split
-        scheduler = LearningRateScheduler(lambda epoch: 0.05)
-        model = DGBFModel(n_trees=3, n_layers=3, random_state=0)
-        model.fit(X_train, y_train, callbacks=[scheduler])
+        scheduler = LearningRateSchedulerCallback(lambda epoch: 0.05)
+        model = DGBFModel(
+            n_trees=3,
+            n_layers=3,
+            random_state=0,
+        )
+        model.fit(
+            X_train,
+            y_train,
+            callbacks=[scheduler],
+        )
         assert model.learning_rate == pytest.approx(0.05)
 
 
@@ -168,8 +206,12 @@ class TestLearningRateScheduler:
 class TestEvaluationMonitor:
     def test_monitor_prints_every_period(self, diabetes_split, capsys):
         X_train, X_val, y_train, y_val = diabetes_split
-        monitor = EvaluationMonitor(period=2)
-        model = DGBFModel(n_trees=3, n_layers=4, random_state=0)
+        monitor = EvaluationMonitorCallback(period=2)
+        model = DGBFModel(
+            n_trees=3,
+            n_layers=4,
+            random_state=0,
+        )
         model.fit(
             X_train,
             y_train,
@@ -183,8 +225,15 @@ class TestEvaluationMonitor:
 
     def test_monitor_silent_without_evals(self, diabetes_split, capsys):
         X_train, _, y_train, _ = diabetes_split
-        monitor = EvaluationMonitor(period=1)
-        model = DGBFModel(n_trees=3, n_layers=3, random_state=0)
-        model.fit(X_train, y_train, callbacks=[monitor])
+        monitor = EvaluationMonitorCallback(period=1)
+        model = DGBFModel(
+            n_trees=3,
+            n_layers=3,
+            random_state=0,
+        ).fit(
+            X_train,
+            y_train,
+            callbacks=[monitor],
+        )
         captured = capsys.readouterr()
         assert captured.out == ""

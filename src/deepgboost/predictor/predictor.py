@@ -69,33 +69,3 @@ class DeepGBoostPredictor:
                 accum += lin.predict(X) * lin.alpha_mix_
 
         return accum
-
-    def predict_raw_per_slot(
-        self,
-        model,
-        X: np.ndarray,
-    ) -> np.ndarray:
-        """
-        Return per-tree-slot accumulated predictions: shape (n_samples, n_trees).
-
-        Column ``t`` contains the accumulated prediction attributable to
-        bagged-tree slot ``t`` across all layers, i.e.
-        ``prior + sum_l  tree_{l,t}.predict(X) * layer_weights_l[t]``.
-
-        Useful for inspecting how each tree slot contributes to the ensemble.
-        """
-        n_samples = X.shape[0]
-        n_trees = model.n_trees
-        accum = np.full((n_samples, n_trees), model.prior_, dtype=np.float64)
-
-        for layer_idx, layer in enumerate(model.graph_):
-            layer_weights = model.weights_[layer_idx]
-            for t, tree in enumerate(layer):
-                accum[:, t] += tree.predict(X)[:, 0] * layer_weights[t]
-
-            if model.linear_projection and model.linear_models_:
-                lin = model.linear_models_[layer_idx]
-                lin_correction = lin.predict(X) * lin.alpha_mix_
-                accum += lin_correction[:, np.newaxis]
-
-        return accum

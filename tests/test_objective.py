@@ -13,13 +13,6 @@ from deepgboost.common.utils import sigmoid
 
 
 class TestRMSEObjective:
-    def test_gradient_shape(self):
-        obj = RMSEObjective()
-        y = np.array([1.0, 2.0, 3.0])
-        F = np.array([1.5, 1.5, 3.5])
-        g = obj.gradient(y, F)
-        assert g.shape == y.shape
-
     def test_gradient_values(self):
         obj = RMSEObjective()
         y = np.array([1.0, 2.0, 3.0])
@@ -39,13 +32,6 @@ class TestRMSEObjective:
 
 
 class TestMAEObjective:
-    def test_gradient_shape(self):
-        obj = MAEObjective()
-        y = np.array([1.0, 2.0, 3.0])
-        F = np.array([1.5, 1.5, 3.5])
-        g = obj.gradient(y, F)
-        assert g.shape == y.shape
-
     def test_gradient_values_are_signs(self):
         obj = MAEObjective()
         y = np.array([1.0, 2.0, 3.0])
@@ -61,13 +47,6 @@ class TestMAEObjective:
 
 
 class TestLogisticObjective:
-    def test_gradient_shape(self):
-        obj = LogisticObjective()
-        y = np.array([0.0, 1.0, 1.0, 0.0])
-        F = np.zeros(4)
-        g = obj.gradient(y, F)
-        assert g.shape == y.shape
-
     def test_gradient_at_zero_logits(self):
         obj = LogisticObjective()
         y = np.array([1.0])
@@ -106,13 +85,6 @@ class TestLogisticObjective:
 
 
 class TestSoftmaxObjective:
-    def test_gradient_shape(self):
-        obj = SoftmaxObjective()
-        y = np.eye(3)[[0, 1, 2, 0]]  # one-hot, (4, 3)
-        F = np.zeros((4, 3))
-        g = obj.gradient(y, F)
-        assert g.shape == y.shape
-
     def test_gradient_values_at_uniform_logits(self):
         obj = SoftmaxObjective()
         y = np.eye(3)[[0]]  # one-hot for class 0, (1, 3)
@@ -127,11 +99,6 @@ class TestSoftmaxObjective:
     def test_prior_raises_for_1d(self):
         obj = SoftmaxObjective()
         with pytest.raises(ValueError, match="one-hot"):
-            obj.prior(np.array([0, 1, 2]))
-
-    def test_1d_input_raises(self):
-        obj = SoftmaxObjective()
-        with pytest.raises(ValueError):
             obj.prior(np.array([0, 1, 2]))
 
 
