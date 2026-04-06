@@ -7,6 +7,8 @@ from matplotlib import pyplot as plt
 
 
 BENCHMARK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RESULTS_DIR = os.path.join(BENCHMARK_DIR, "results")
+os.makedirs(RESULTS_DIR, exist_ok=True)
 
 
 class AbstractModelTest:
@@ -31,35 +33,41 @@ class AbstractModelTest:
         reference = model_names[-1]
         ref_scores = scores_dict[reference]
 
-        lines = [
-            f"{n} Score: {s.mean():.4f} +- {s.std():.4f}"
+        records = [
+            {"model": n, "mean": float(s.mean()), "std": float(s.std())}
             for n, s in scores_dict.items()
         ]
         for model_name, scores in scores_dict.items():
             if model_name != reference:
                 diff = ref_scores - scores
-                lines.append(
-                    f"Difference ({reference} - {model_name}): {diff.mean():.4f} +- {diff.std():.4f}"
-                )
+                records.append({
+                    "diff_reference": reference,
+                    "diff_model": model_name,
+                    "mean": float(diff.mean()),
+                    "std": float(diff.std()),
+                })
 
         file_name = (
-            f"{BENCHMARK_DIR}/results/{name.replace(' ', '_').lower()}.txt"
+            f"{BENCHMARK_DIR}/results/{name.replace(' ', '_').lower()}.json"
         )
         with open(file_name, "w") as file:
-            file.write("\n".join(lines))
+            json.dump(records, file, indent=2)
 
     def _save_scores(self, name, scores_dict):
         model_names = list(scores_dict.keys())
         reference = model_names[-1]
         score_arrays = list(scores_dict.values())
 
-        file_name = f"{BENCHMARK_DIR}/results/{name.replace(' ', '_').lower()}_scores.jsonl"
+        records = []
+        for values in zip(*score_arrays):
+            record = {n: float(v) for n, v in zip(model_names, values)}
+            for n, v in zip(model_names[:-1], values[:-1]):
+                record[f"diff_{reference}_vs_{n}"] = float(values[-1]) - float(v)
+            records.append(record)
+
+        file_name = f"{BENCHMARK_DIR}/results/{name.replace(' ', '_').lower()}_scores.json"
         with open(file_name, "w") as file:
-            for values in zip(*score_arrays):
-                record = {n: float(v) for n, v in zip(model_names, values)}
-                for n, v in zip(model_names[:-1], values[:-1]):
-                    record[f"diff_{reference}_vs_{n}"] = float(values[-1]) - float(v)
-                file.write(json.dumps(record) + "\n")
+            json.dump(records, file, indent=2)
 
     def _plot_scores(self, name, scores_dict, n_bins):
         all_scores = np.concatenate(list(scores_dict.values()))

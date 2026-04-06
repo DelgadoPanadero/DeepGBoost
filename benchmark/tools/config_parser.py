@@ -1,7 +1,7 @@
 import json
 
 _MODEL_KEYS = {"module", "object", "parameters"}
-_EXPERIMENT_KEYS = {"module", "object", "parameters", "task"}
+_EXPERIMENT_KEYS = {"module", "object", "parameters"}
 _DATASET_REQUIRED_KEYS = {"name", "url", "function", "file"}
 
 
@@ -28,9 +28,9 @@ class ConfigParser:
 
     def _validate(self, config):
         assert {"Description", "Experiments", "Datasets"} <= config.keys()
-        assert "RegressionModels" in config or "ClassificationModels" in config
+        assert "regression" in config or "classification" in config
 
-        for models_key in ("RegressionModels", "ClassificationModels"):
+        for models_key in ("regression", "classification"):
             if models_key in config:
                 assert (
                     isinstance(config[models_key], dict)
@@ -51,7 +51,6 @@ class ConfigParser:
             assert isinstance(exp["module"], str)
             assert isinstance(exp["object"], str)
             assert isinstance(exp["parameters"], dict)
-            assert exp["task"] in ("regression", "classification")
 
         assert (
             isinstance(config["Datasets"], list) and len(config["Datasets"]) > 0

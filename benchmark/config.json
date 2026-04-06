@@ -1,6 +1,6 @@
 {
   "Description": "",
-  "RegressionModels": {
+  "regression": {
     "model_1": {
       "module": "benchmark.models",
       "object": "GradientBoostingModel",
@@ -28,11 +28,12 @@
       "parameters": {
         "n_layers": 5,
         "learning_rate": 0.8,
-        "n_trees": 20
+        "n_trees": 20,
+        "n_jobs": 8
       }
     }
   },
-  "ClassificationModels": {
+  "classification": {
     "model_1": {
       "module": "benchmark.models",
       "object": "GradientBoostingClassifierModel",
@@ -58,10 +59,10 @@
       "module": "benchmark.models",
       "object": "DeepGBoostClassifierModel",
       "parameters": {
-        "n_layers": 50,
-        "learning_rate": 0.3,
-        "n_trees": 2,
-        "subsample_min_frac": 0.3
+        "n_layers": 5,
+        "learning_rate": 0.8,
+        "n_trees": 20,
+        "n_jobs": 8
       }
     }
   },
@@ -69,19 +70,9 @@
     {
       "module": "benchmark.experiments.bootstrap_test",
       "object": "BootstrapModelTest",
-      "task": "regression",
       "parameters": {
-        "n_runs": 100,
-        "n_bins": 20
-      }
-    },
-    {
-      "module": "benchmark.experiments.classification_bootstrap_test",
-      "object": "ClassificationBootstrapTest",
-      "task": "classification",
-      "parameters": {
-        "n_runs": 100,
-        "n_bins": 20
+        "n_runs": 5,
+        "n_bins": 5
       }
     }
   ],
@@ -93,7 +84,7 @@
       "file": "data/bank_full.csv",
       "sep": ";",
       "zip_entry": "bank-full.csv",
-      "categorical_columns": ["job", "marital", "education", "default", "housing", "loan", "contact", "month", "poutcome"],
+      "target_column": "y",
       "task": "classification"
     },
     {
@@ -102,9 +93,8 @@
       "function": "read_csv",
       "file": "data/abalone.csv",
       "sep": ",",
-      "column_names": ["sex", "length", "diameter", "height", "whole_weight", "shucked_weight", "viscera_weight", "shell_weight", "rings"],
-      "categorical_columns": ["sex"],
-      "task": "regression"
+      "target_column": "sex",
+      "task": "classification"
     },
     {
       "name": "Adult",
@@ -113,9 +103,7 @@
       "file": "data/adult.csv",
       "sep": ",",
       "skipinitialspace": true,
-      "column_names": ["age", "workclass", "fnlwgt", "education", "education_num", "marital_status", "occupation", "relationship", "race", "sex", "capital_gain", "capital_loss", "hours_per_week", "native_country", "income"],
-      "drop_columns": ["fnlwgt"],
-      "categorical_columns": ["workclass", "education", "marital_status", "occupation", "relationship", "race", "sex", "native_country"],
+      "target_column": "income",
       "task": "classification"
     },
     {
@@ -125,9 +113,6 @@
       "file": "data/penguins.csv",
       "sep": ",",
       "target_column": "species",
-      "drop_columns": ["year"],
-      "categorical_columns": ["island", "sex"],
-      "dropna": true,
       "task": "classification"
     },
     {
@@ -137,6 +122,7 @@
       "file": "data/UCI_CBM_Dataset.csv",
       "sep": "\\s+",
       "zip_entry": "UCI CBM Dataset/data.txt",
+      "target_column": "GT_turbine_decay",
       "task": "regression"
     },
     {
@@ -146,8 +132,6 @@
       "file": "data/california_housing.csv",
       "sep": ",",
       "target_column": "median_house_value",
-      "categorical_columns": ["ocean_proximity"],
-      "dropna": true,
       "task": "regression"
     },
     {
@@ -157,6 +141,7 @@
       "file": "data/SeoulBikeData.csv",
       "sep": ",",
       "encoding": "latin-1",
+      "target_column": "Rented Bike Count",
       "task": "regression"
     },
     {
@@ -165,6 +150,7 @@
       "function": "read_excel",
       "file": "data/concrete.csv",
       "sep": ",",
+      "target_column": "Concrete compressive strength(MPa, megapascals) ",
       "task": "regression"
     }
   ]

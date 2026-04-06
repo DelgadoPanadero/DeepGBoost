@@ -6,7 +6,8 @@ from importlib import import_module
 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OrdinalEncoder, LabelEncoder
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 
 BENCHMARK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -44,12 +45,9 @@ class ExperimentRunner:
     def _load_models(self, config):
         self._models = {}
 
-        for task_key, task in [
-            ("RegressionModels", "regression"),
-            ("ClassificationModels", "classification"),
-        ]:
+        for task in ["regression","classification"]:
             models = {}
-            for name, model_config in config.get(task_key, {}).items():
+            for name, model_config in config.get(task, {}).items():
                 module = model_config["module"]
                 obj = model_config["object"]
                 params = model_config["parameters"]
@@ -59,18 +57,18 @@ class ExperimentRunner:
         return self._models
 
     def _load_experiments(self, config):
-        self._experiments = {"regression": {}, "classification": {}}
 
-        for experiment in config["Experiments"]:
-            module = experiment["module"]
-            obj = experiment["object"]
-            params = experiment["parameters"]
-            task = experiment.get("task", "regression")
+        self._experiments = {"regression":{}, "classification":{}}
+        for task in  self._experiments:
+            for experiment in config["Experiments"]:
+                module = experiment["module"]
+                obj = experiment["object"]
+                params = experiment["parameters"]
 
-            params["models"] = list(self._models[task].values())
-            self._experiments[task][obj] = getattr(import_module(module), obj)(
-                **params
-            )
+                task_params = {**params, "models": list(self._models[task].values()), "task": task}
+                self._experiments[task][obj] = getattr(import_module(module), obj)(
+                    **task_params
+                )
 
         return self._experiments
 
@@ -104,45 +102,28 @@ class ExperimentRunner:
                 else:
                     df = func(dataset["url"], **kwargs)
 
-                if "drop_columns" in dataset:
-                    df = df.drop(
-                        columns=dataset["drop_columns"], errors="ignore"
-                    )
-
                 df.to_csv(file_path, index=False)
 
-            data = pd.read_csv(file_path)
-
-            if dataset.get("dropna"):
-                data = data.dropna().reset_index(drop=True)
-
-            if "target_column" in dataset:
-                target_col = dataset["target_column"]
-                cols = [c for c in data.columns if c != target_col] + [
-                    target_col
-                ]
-                data = data[cols]
-
-            if "categorical_columns" in dataset:
-                cat_cols = dataset["categorical_columns"]
-                encoder = OrdinalEncoder(
-                    handle_unknown="use_encoded_value", unknown_value=-1
-                )
-                data[cat_cols] = encoder.fit_transform(
-                    data[cat_cols]
-                    .astype(str)
-                    .apply(lambda col: col.str.strip())
-                )
-
+            data = pd.read_csv(file_path).dropna().reset_index(drop=True)
             task = dataset.get("task", "regression")
-            X = np.array(data.iloc[:, :-1])
+            target = dataset["target_column"]
 
+            X = data.drop(target,axis=1)
+            if cat_cols := X.select_dtypes(exclude=['number']).columns.tolist():
+                encoder = OneHotEncoder()
+                new_data = encoder.fit_transform(
+                    X[cat_cols].astype(str).apply(lambda col: col.str.strip())
+                )
+                X = X.drop(cat_cols, axis=1)
+                X[encoder.get_feature_names_out()] = new_data.todense()
+                X = X.values
+
+            y = data[target]
             if task == "classification":
-                y_raw = data.iloc[:, -1].astype(str).str.strip().str.rstrip(".")
-                le = LabelEncoder()
-                y = le.fit_transform(y_raw)
-            else:
-                y = np.array(data.iloc[:, -1])
+                encoder = LabelEncoder()
+                y = encoder.fit_transform(
+                    y.astype(str).apply(lambda col: col.strip())
+                )
 
             self._datasets[dataset["name"]] = (X, y, task)
 
