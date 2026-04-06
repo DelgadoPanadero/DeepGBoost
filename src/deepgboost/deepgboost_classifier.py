@@ -26,17 +26,6 @@ from .common.utils import sigmoid, softmax
 from .common.categorical import CategoricalEncoderMixin
 
 
-# ---------------------------------------------------------------------------
-# Shared parameter defaults (mirrors XGBModel grouping)
-# ---------------------------------------------------------------------------
-
-_TREE_PARAMS = ("n_trees", "n_layers", "max_depth", "max_features")
-_LEARNING_PARAMS = ("learning_rate", "subsample_min_frac", "weight_solver")
-_REGULARISATION_PARAMS = ("linear_projection", "linear_alpha")
-_CONFIG_PARAMS = ("objective", "random_state", "n_jobs")
-_CALLBACK_PARAMS = ("early_stopping_rounds", "eval_metric")
-
-
 class DeepGBoostClassifier(
     CategoricalEncoderMixin, BaseEstimator, ClassifierMixin
 ):
@@ -67,10 +56,6 @@ class DeepGBoostClassifier(
         Shrinkage factor.
     subsample_min_frac : float, default=0.3
         Minimum subsample fraction at layer 0.
-    weight_solver : str, default="nnls"
-        How to combine the T bagged trees in each layer.  ``"nnls"`` finds
-        optimal non-negative weights.  ``"uniform"`` assigns equal weight to
-        every tree (standard RandomForest averaging).
     linear_projection : bool, default=False
         Add Ridge regression correction per layer.
     linear_alpha : float, default=1.0
@@ -95,7 +80,6 @@ class DeepGBoostClassifier(
         max_features: int | float | str | None = None,
         learning_rate: float = 0.1,
         subsample_min_frac: float = 0.3,
-        weight_solver: str = "nnls",
         linear_projection: bool = False,
         linear_alpha: float = 1.0,
         objective: str | None = None,
@@ -110,7 +94,7 @@ class DeepGBoostClassifier(
         self.max_features = max_features
         self.learning_rate = learning_rate
         self.subsample_min_frac = subsample_min_frac
-        self.weight_solver = weight_solver
+        self.weight_solver = "uniform"
         self.linear_projection = linear_projection
         self.linear_alpha = linear_alpha
         self.objective = objective
@@ -177,10 +161,10 @@ class DeepGBoostClassifier(
 
         all_callbacks = list(callbacks or [])
         if self.early_stopping_rounds is not None and eval_set:
-            from .callbacks.base_callback import EarlyStopping
+            from .callbacks import EarlyStoppingCallback
 
             all_callbacks.append(
-                EarlyStopping(patience=self.early_stopping_rounds)
+                EarlyStoppingCallback(patience=self.early_stopping_rounds)
             )
 
         if n_classes == 2:
