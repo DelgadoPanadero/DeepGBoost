@@ -9,6 +9,6 @@ if __name__ == "__main__":
     config_parser = ConfigParser(config_path)
     config = config_parser.config
 
-    #runner = ExperimentRunner(config)
-    #runner.run()
+    runner = ExperimentRunner(config)
+    runner.run()
     BenchmarkGenerator().save()
