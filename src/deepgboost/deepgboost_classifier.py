@@ -56,6 +56,13 @@ class DeepGBoostClassifier(
         Shrinkage factor.
     subsample_min_frac : float, default=0.3
         Minimum subsample fraction at layer 0.
+    weight_solver : str, default="nnls"
+        How to combine the T bagged trees in each layer.  ``"nnls"`` finds
+        optimal non-negative weights; ``"uniform"`` assigns equal weight.
+    hessian_reg : float, default=0.0
+        L2 regularisation added to the Hessian denominator of the Newton step:
+        ``pseudo_y = g / (h + hessian_reg) * lr``.  Mirrors XGBoost's
+        ``lambda`` parameter — set to 1.0 for XGBoost-equivalent behaviour.
     linear_projection : bool, default=False
         Add Ridge regression correction per layer.
     linear_alpha : float, default=1.0
@@ -80,6 +87,8 @@ class DeepGBoostClassifier(
         max_features: int | float | str | None = None,
         learning_rate: float = 0.1,
         subsample_min_frac: float = 0.3,
+        weight_solver: str = "nnls",
+        hessian_reg: float = 0.0,
         linear_projection: bool = False,
         linear_alpha: float = 1.0,
         objective: str | None = None,
@@ -94,7 +103,8 @@ class DeepGBoostClassifier(
         self.max_features = max_features
         self.learning_rate = learning_rate
         self.subsample_min_frac = subsample_min_frac
-        self.weight_solver = "uniform"
+        self.weight_solver = weight_solver
+        self.hessian_reg = hessian_reg
         self.linear_projection = linear_projection
         self.linear_alpha = linear_alpha
         self.objective = objective
@@ -151,6 +161,7 @@ class DeepGBoostClassifier(
             learning_rate=self.learning_rate,
             subsample_min_frac=self.subsample_min_frac,
             weight_solver=self.weight_solver,
+            hessian_reg=self.hessian_reg,
             linear_projection=self.linear_projection,
             linear_alpha=self.linear_alpha,
             random_state=self.random_state,

@@ -60,6 +60,11 @@ class DeepGBoostRegressor(
         RandomForest averaging); with ``n_layers=1`` and
         ``learning_rate=1.0`` this makes the model exactly equivalent to a
         RandomForest.
+    hessian_reg : float, default=0.0
+        L2 regularisation added to the Hessian denominator of the Newton step:
+        ``pseudo_y = g / (h + hessian_reg) * lr``.  Mirrors XGBoost's
+        ``lambda`` parameter.  For MSE regression (h=1 everywhere) the
+        effect is negligible at the default value of 0.0.
     linear_projection : bool, default=False
         Add a Ridge regression correction at each layer (XGBoost gblinear
         analogue) to capture linear trends that trees cannot model.
@@ -88,6 +93,7 @@ class DeepGBoostRegressor(
         learning_rate: float = 0.1,
         subsample_min_frac: float = 0.3,
         weight_solver: str = "nnls",
+        hessian_reg: float = 0.0,
         linear_projection: bool = False,
         linear_alpha: float = 1.0,
         objective: str = "reg:squarederror",
@@ -103,6 +109,7 @@ class DeepGBoostRegressor(
         self.learning_rate = learning_rate
         self.subsample_min_frac = subsample_min_frac
         self.weight_solver = weight_solver
+        self.hessian_reg = hessian_reg
         self.linear_projection = linear_projection
         self.linear_alpha = linear_alpha
         self.objective = objective
@@ -151,6 +158,7 @@ class DeepGBoostRegressor(
             learning_rate=self.learning_rate,
             subsample_min_frac=self.subsample_min_frac,
             weight_solver=self.weight_solver,
+            hessian_reg=self.hessian_reg,
             linear_projection=self.linear_projection,
             linear_alpha=self.linear_alpha,
             objective=self.objective,

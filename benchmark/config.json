@@ -59,9 +59,13 @@
       "module": "benchmark.models",
       "object": "DeepGBoostClassifierModel",
       "parameters": {
-        "n_layers": 20,
-        "learning_rate": 0.1,
-        "n_trees": 5,
+        "n_layers": 10,
+        "n_trees": 10,
+        "learning_rate": 0.3,
+        "max_depth": 6,
+        "max_features": null,
+        "subsample_min_frac": 0.5,
+        "weight_solver": "nnls",
         "n_jobs": 8
       }
     }

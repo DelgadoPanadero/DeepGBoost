@@ -47,6 +47,7 @@ class TreeUpdater:
         self,
         X_sub: np.ndarray,
         pseudo_y_sub: np.ndarray,
+        sample_weight: np.ndarray | None = None,
     ) -> "TreeUpdater":
         """
         Fit the tree on a bootstrap subsample.
@@ -56,12 +57,16 @@ class TreeUpdater:
         X_sub : (n_sub, n_features)
         pseudo_y_sub : (n_sub,)
             1-D pseudo-residuals for this tree's slot.
+        sample_weight : (n_sub,) or None
+            Per-sample weights (e.g. hessian values) passed to the
+            underlying tree.  When not None, sklearn's weighted least
+            squares splitting is used, focusing splits on uncertain samples.
 
         Returns
         -------
         self
         """
-        self._tree.fit(X_sub, pseudo_y_sub)
+        self._tree.fit(X_sub, pseudo_y_sub, sample_weight=sample_weight)
         return self
 
     def predict(

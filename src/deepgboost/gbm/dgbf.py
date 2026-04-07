@@ -88,6 +88,7 @@ class DGBFModel:
         linear_alpha: float = 1.0,
         subsample_min_frac: float = 0.3,
         weight_solver: str = "nnls",
+        hessian_reg: float = 0.0,
         objective: str | BaseObjective = "reg:squarederror",
         random_state: int | None = None,
     ):
@@ -100,6 +101,7 @@ class DGBFModel:
         self.linear_alpha = linear_alpha
         self.subsample_min_frac = subsample_min_frac
         self.weight_solver = weight_solver
+        self.hessian_reg = hessian_reg
         self.objective = objective
         self.random_state = random_state
 
@@ -190,11 +192,13 @@ class DGBFModel:
             g_global = obj.gradient(y, F_prev)  # (n_samples,)
             h_global = obj.hessian(y, F_prev)   # (n_samples,)
 
-            # Newton step: g/h scales the update correctly for objectives whose
-            # Hessian varies with F (e.g. logistic: h = p*(1-p)).  For MSE the
-            # Hessian is 1 everywhere, so this reduces to the original gradient
-            # step.  Clipping h avoids division by zero near p=0 or p=1.
-            pseudo_y = (g_global / np.maximum(h_global, 1e-7)) * self.learning_rate  # (n_samples,)
+            # Newton step: g/(h + reg) scales the update correctly for
+            # objectives whose Hessian varies with F (e.g. logistic).
+            # ``hessian_reg`` (λ) mirrors XGBoost's L2 leaf regularisation:
+            # it prevents extreme Newton steps when h is small (e.g. near the
+            # prior for imbalanced datasets) and improves convergence stability.
+            # For MSE (h=1 everywhere) this term has minimal effect.
+            pseudo_y = (g_global / np.maximum(h_global + self.hessian_reg, 1e-7)) * self.learning_rate  # (n_samples,)
 
             # Before-iteration callbacks
             stop = False
@@ -207,7 +211,7 @@ class DGBFModel:
 
             # --- Fit this layer ------------------------------------------
             new_layer, new_weights = self._fit_layer(
-                X, pseudo_y, layer_idx, rng
+                X, pseudo_y, layer_idx, rng, h_global
             )
             self.graph_.append(new_layer)
             self.weights_.append(new_weights)
@@ -274,6 +278,7 @@ class DGBFModel:
         pseudo_y: np.ndarray,
         layer_idx: int,
         rng: np.random.Generator,
+        hessian: np.ndarray | None = None,
     ) -> tuple[list[TreeUpdater], np.ndarray]:
         """
         Fit all T trees for layer ``layer_idx`` using bagging.
@@ -281,6 +286,11 @@ class DGBFModel:
         Each tree is trained independently on:
         * a dynamic bootstrap row-subsample (paper sec. 3.1.3), and
         * a random feature subset governed by ``max_features``.
+
+        When ``hessian`` is provided, each tree is fit with per-sample
+        weights equal to the Hessian values.  This mirrors XGBoost's
+        behaviour: splits focus on uncertain samples (h_i > 0) and
+        down-weight already-confident predictions (h_i ≈ 0).
 
         After fitting, a single weight vector of length T is computed via
         NNLS on the full dataset to optimally combine the T tree predictions.
@@ -292,6 +302,8 @@ class DGBFModel:
             Shrunk pseudo-residuals for this layer.
         layer_idx : int
         rng : np.random.Generator
+        hessian : (n_samples,) or None
+            Per-sample Hessian values used as tree fitting sample weights.
 
         Returns
         -------
@@ -321,7 +333,8 @@ class DGBFModel:
                 max_features=self.max_features,
                 random_state=tree_seed,
             )
-            tree.fit(X[sample_idx], pseudo_y[sample_idx])
+            sw = hessian[sample_idx] if hessian is not None else None
+            tree.fit(X[sample_idx], pseudo_y[sample_idx], sample_weight=sw)
 
             new_layer.append(tree)
             tree_preds.append(tree.predict(X)[:, 0])  # (n_samples,)
@@ -390,6 +403,7 @@ class DGBFModel:
             "linear_alpha": self.linear_alpha,
             "subsample_min_frac": self.subsample_min_frac,
             "weight_solver": self.weight_solver,
+            "hessian_reg": self.hessian_reg,
             "objective": self.objective,
             "random_state": self.random_state,
         }
