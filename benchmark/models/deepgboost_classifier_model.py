@@ -4,7 +4,7 @@ from .abstract_model import AbstractModel
 
 
 class DeepGBoostClassifierModel(AbstractModel):
-    def __init__(self, n_layers=5, learning_rate=0.8, n_trees=20, **kwargs):
+    def __init__(self, n_layers=10, learning_rate=0.3, n_trees=10, **kwargs):
         self._model = DeepGBoostClassifier(
             n_layers=n_layers,
             learning_rate=learning_rate,
