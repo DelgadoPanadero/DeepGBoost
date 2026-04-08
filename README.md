@@ -1,7 +1,9 @@
 #  DeepGBoost
 
+[![PyPI version](https://badge.fury.io/py/deepgboost.svg)](https://pypi.python.org/pypi/deepgboost/)
 [![CI](https://github.com/DelgadoPanadero/DeepGBoost/actions/workflows/ci.yml/badge.svg)](https://github.com/DelgadoPanadero/DeepGBoost/actions/workflows/ci.yml)
 [![Coverage](https://codecov.io/gh/DelgadoPanadero/DeepGBoost/branch/main/graph/badge.svg)](https://codecov.io/gh/DelgadoPanadero/DeepGBoost)
+[![PythonVersion](https://img.shields.io/pypi/pyversions/deepgboost.svg)](https://pypi.org/project/deepgboost/)
 
 Machine Learning algorithm based on gradient boosting forest that merges the power of tree ensembles with neural network architectures.
 
