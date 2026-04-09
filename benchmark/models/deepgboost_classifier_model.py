@@ -1,16 +1,11 @@
-from deepgboost import DeepGBoostClassifier
+from deepgboost import DeepGBoostMultiClassifier
 
 from .abstract_model import AbstractModel
 
 
 class DeepGBoostClassifierModel(AbstractModel):
-    def __init__(self, n_layers=10, learning_rate=0.3, n_trees=10, **kwargs):
-        self._model = DeepGBoostClassifier(
-            n_layers=n_layers,
-            learning_rate=learning_rate,
-            n_trees=n_trees,
-            **kwargs,
-        )
+    def __init__(self, **kwargs):
+        self._model = DeepGBoostMultiClassifier(**kwargs)
 
     @property
     def name(self) -> str:

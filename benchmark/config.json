@@ -24,7 +24,7 @@
     },
     "model_4": {
       "module": "benchmark.models",
-      "object": "DeepGBoostModel",
+      "object": "DeepGBoostRegressorModel",
       "parameters": {
         "n_layers": 5,
         "n_trees": 20,
@@ -71,12 +71,21 @@
       "module": "benchmark.experiments.bootstrap_test",
       "object": "BootstrapModelTest",
       "parameters": {
-        "n_runs": 100,
-        "n_bins": 20
+        "n_runs": 5,
+        "n_bins": 5
       }
     }
   ],
   "Datasets": [
+    {
+      "name": "Penguins",
+      "url": "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/main/inst/extdata/penguins.csv",
+      "function": "read_csv",
+      "file": "data/penguins.csv",
+      "sep": ",",
+      "target_column": "species",
+      "task": "classification"
+    },
     {
       "name": "BankMarketing",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00222/bank.zip",
@@ -104,15 +113,6 @@
       "sep": ",",
       "skipinitialspace": true,
       "target_column": "income",
-      "task": "classification"
-    },
-    {
-      "name": "Penguins",
-      "url": "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/main/inst/extdata/penguins.csv",
-      "function": "read_csv",
-      "file": "data/penguins.csv",
-      "sep": ",",
-      "target_column": "species",
       "task": "classification"
     },
     {

@@ -4,10 +4,8 @@ from .abstract_model import AbstractModel
 
 
 class RandomForestClassifierModel(AbstractModel):
-    def __init__(self, n_estimators=100, **kwargs):
-        self._model = RandomForestClassifier(
-            n_estimators=n_estimators, **kwargs
-        )
+    def __init__(self, **kwargs):
+        self._model = RandomForestClassifier(**kwargs)
 
     @property
     def name(self) -> str:

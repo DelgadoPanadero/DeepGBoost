@@ -23,12 +23,14 @@ Sklearn API::
 
 from .deepgboost_regressor import DeepGBoostRegressor
 from .deepgboost_classifier import DeepGBoostClassifier
+from .deepgboost_multiclassifier import DeepGBoostMultiClassifier
 from .callbacks import TrainingCallback
 from .callbacks import EarlyStoppingCallback
 from .callbacks import LearningRateSchedulerCallback
 from .callbacks import EvaluationMonitorCallback
 from .plotting import plot_importance
 from .gbm.dgbf import DGBFModel
+from .gbm.dgbf_multioutput import DGBFMultiOutputModel
 from .objective import get_objective
 from .metric import get_metric
 
@@ -38,6 +40,7 @@ __all__ = [
     # Sklearn estimators
     "DeepGBoostRegressor",
     "DeepGBoostClassifier",
+    "DeepGBoostMultiClassifier",
     # Callbacks
     "TrainingCallback",
     "EarlyStoppingCallback",
@@ -47,6 +50,7 @@ __all__ = [
     "plot_importance",
     # Low-level
     "DGBFModel",
+    "DGBFMultiOutputModel",
     "get_objective",
     "get_metric",
     # Version
