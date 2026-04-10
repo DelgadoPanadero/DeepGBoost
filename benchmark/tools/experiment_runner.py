@@ -43,34 +43,37 @@ class ExperimentRunner:
         return self._experiments
 
     def _load_models(self, config):
+        # Store raw configs only; instantiation happens per-dataset in run().
+        self._model_configs = {}
         self._models = {}
 
-        for task in ["regression","classification"]:
-            models = {}
-            for name, model_config in config.get(task, {}).items():
-                module = model_config["module"]
-                obj = model_config["object"]
-                params = model_config["parameters"]
-                models[name] = getattr(import_module(module), obj)(**params)
-            self._models[task] = models
+        for task in ["regression", "classification"]:
+            self._model_configs[task] = config.get(task, {})
+            self._models[task] = {}
 
         return self._models
 
     def _load_experiments(self, config):
-
-        self._experiments = {"regression":{}, "classification":{}}
-        for task in  self._experiments:
-            for experiment in config["Experiments"]:
-                module = experiment["module"]
-                obj = experiment["object"]
-                params = experiment["parameters"]
-
-                task_params = {**params, "models": list(self._models[task].values()), "task": task}
-                self._experiments[task][obj] = getattr(import_module(module), obj)(
-                    **task_params
-                )
-
+        # Store experiment configs keyed by task so fresh model instances can be
+        # created per-dataset in run() — avoids XGBoost objective/num_class carry-over.
+        self._experiment_configs = config["Experiments"]
+        self._experiments = {"regression": {}, "classification": {}}
         return self._experiments
+
+    def _build_experiments_for_task(self, task: str):
+        """Return a dict of freshly instantiated experiments with new model instances."""
+        experiments = {}
+        for experiment in self._experiment_configs:
+            module = experiment["module"]
+            obj = experiment["object"]
+            params = experiment["parameters"]
+            fresh_models = [
+                getattr(import_module(mc["module"]), mc["object"])(**mc["parameters"])
+                for mc in self._model_configs[task].values()
+            ]
+            task_params = {**params, "models": fresh_models, "task": task}
+            experiments[obj] = getattr(import_module(module), obj)(**task_params)
+        return experiments
 
     def _load_datasets(self, config):
         self._datasets = {}
@@ -131,5 +134,8 @@ class ExperimentRunner:
 
     def run(self):
         for dataset_name, (X, y, task) in self.datasets.items():
-            for name, experiment in self._experiments[task].items():
+            # Fresh model instances per dataset to prevent fitted state carry-over
+            # (e.g. XGBoost multi:softmax / num_class leaking into binary tasks).
+            experiments = self._build_experiments_for_task(task)
+            for name, experiment in experiments.items():
                 experiment.run(dataset_name, X, y)
