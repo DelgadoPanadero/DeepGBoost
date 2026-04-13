@@ -11,9 +11,9 @@ class LearningRateSchedulerCallback(TrainingCallback):
         A function ``f(epoch: int) -> float`` that returns the new
         learning rate for that layer.
 
-    Example::
-
-        scheduler = LearningRateScheduler(lambda epoch: 0.1 * 0.95**epoch)
+    Examples
+    --------
+    >>> scheduler = LearningRateScheduler(lambda epoch: 0.1 * 0.95**epoch)
     """
 
     def __init__(self, schedule_fn):

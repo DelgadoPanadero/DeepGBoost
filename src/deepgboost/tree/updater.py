@@ -63,8 +63,9 @@ class TreeUpdater:
 
         Parameters
         ----------
-        X_sub : (n_sub, n_features)
-        pseudo_y_sub : (n_sub,)
+        X_sub : np.ndarray of shape (n_sub, n_features)
+            Bootstrap subsample of training features.
+        pseudo_y_sub : np.ndarray of shape (n_sub,)
             1-D pseudo-residuals for this tree's slot.
         sample_weight : (n_sub,) or None
             Per-sample weights (e.g. hessian values) passed to the
@@ -85,9 +86,15 @@ class TreeUpdater:
         """
         Predict gradient components for all samples.
 
+        Parameters
+        ----------
+        X : np.ndarray of shape (n_samples, n_features)
+            Input data.
+
         Returns
         -------
-        np.ndarray of shape (n_samples, n_trees)
+        np.ndarray of shape (n_samples, 1)
+            One column per tree (always 1 for a single-tree updater).
         """
         out = self._tree.predict(X)
         if out.ndim == 1:
@@ -101,4 +108,5 @@ class TreeUpdater:
 
     @property
     def n_features_in_(self) -> int:
+        """Number of features seen during fit."""
         return self._tree.n_features_in_

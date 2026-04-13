@@ -17,7 +17,25 @@ OBJECTIVES: dict[str, type] = {
 
 
 def get_objective(name: str):
-    """Return an objective instance by name string."""
+    """
+    Return an objective instance by name string.
+
+    Parameters
+    ----------
+    name : str
+        Objective alias.  Must be one of ``"reg:squarederror"``,
+        ``"reg:absoluteerror"``, ``"binary:logistic"``, ``"multi:softmax"``.
+
+    Returns
+    -------
+    BaseObjective
+        An instantiated objective object.
+
+    Raises
+    ------
+    ValueError
+        If ``name`` is not a registered objective alias.
+    """
     if name not in OBJECTIVES:
         raise ValueError(
             f"Unknown objective '{name}'. Available: {list(OBJECTIVES.keys())}",

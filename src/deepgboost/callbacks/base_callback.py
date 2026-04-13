@@ -8,14 +8,12 @@ Callbacks hook into the training loop at four points:
 ``before_iteration`` and ``after_iteration`` return a boolean; returning
 ``True`` signals early stopping.
 
-Usage example::
-
-    from deepgboost import DeepGBoostRegressor, EarlyStopping
-
-    es = EarlyStopping(patience=5, metric="train_loss")
-    reg = DeepGBoostRegressor(n_layers=50)
-    reg.fit(X_train, y_train, callbacks=[es],
-            evals=[(X_val, y_val, "val")])
+Examples
+--------
+>>> from deepgboost import DeepGBoostRegressor, EarlyStopping
+>>> es = EarlyStopping(patience=5, metric="train_loss")
+>>> reg = DeepGBoostRegressor(n_layers=50)
+>>> reg.fit(X_train, y_train, callbacks=[es], evals=[(X_val, y_val, "val")])
 """
 
 from __future__ import annotations
@@ -50,6 +48,15 @@ class TrainingCallback:
         """
         Called at the start of each boosting layer.
 
+        Parameters
+        ----------
+        model : DGBFModel
+            The model being trained.
+        epoch : int
+            Zero-based layer index.
+        evals_log : dict
+            ``{dataset_name: {metric_name: latest_value}}`` for all eval sets.
+
         Returns
         -------
         bool
@@ -68,6 +75,10 @@ class TrainingCallback:
 
         Parameters
         ----------
+        model : DGBFModel
+            The model being trained.
+        epoch : int
+            Zero-based layer index.
         evals_log : dict
             ``{dataset_name: {metric_name: latest_value}}`` for all eval sets.
 

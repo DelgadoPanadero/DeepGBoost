@@ -72,9 +72,24 @@ class RMSEObjective(BaseObjective):
         y: np.ndarray,
         F: np.ndarray,
     ) -> np.ndarray:
+        """
+        Compute pseudo-residuals for MSE loss.
+
+        Parameters
+        ----------
+        y : np.ndarray of shape (n_samples,)
+            True target values.
+        F : np.ndarray of shape (n_samples,)
+            Current ensemble predictions.
+
+        Returns
+        -------
+        np.ndarray of shape (n_samples,)
+        """
         return y - F
 
     def prior(self, y: np.ndarray) -> float:
+        """Return mean of y as the optimal constant prediction."""
         return float(y.mean())
 
 
@@ -92,7 +107,22 @@ class MAEObjective(BaseObjective):
         y: np.ndarray,
         F: np.ndarray,
     ) -> np.ndarray:
+        """
+        Compute pseudo-residuals for MAE loss.
+
+        Parameters
+        ----------
+        y : np.ndarray of shape (n_samples,)
+            True target values.
+        F : np.ndarray of shape (n_samples,)
+            Current ensemble predictions.
+
+        Returns
+        -------
+        np.ndarray of shape (n_samples,)
+        """
         return np.sign(y - F)
 
     def prior(self, y: np.ndarray) -> float:
+        """Return median of y as the optimal constant prediction."""
         return float(np.median(y))

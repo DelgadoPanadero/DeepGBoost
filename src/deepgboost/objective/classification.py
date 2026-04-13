@@ -23,6 +23,20 @@ class LogisticObjective(BaseObjective):
         y: np.ndarray,
         F: np.ndarray,
     ) -> np.ndarray:
+        """
+        Compute pseudo-residuals for binary logistic loss.
+
+        Parameters
+        ----------
+        y : np.ndarray of shape (n_samples,)
+            True binary targets in {0, 1}.
+        F : np.ndarray of shape (n_samples,)
+            Current raw ensemble predictions (log-odds).
+
+        Returns
+        -------
+        np.ndarray of shape (n_samples,)
+        """
         return y - sigmoid(F)
 
     def hessian(
@@ -30,7 +44,20 @@ class LogisticObjective(BaseObjective):
         y: np.ndarray,
         F: np.ndarray,
     ) -> np.ndarray:
-        """h_i = p_i * (1 - p_i),  p_i = sigmoid(F_i)."""
+        """
+        Diagonal of the loss Hessian: h_i = p_i * (1 - p_i), p_i = sigmoid(F_i).
+
+        Parameters
+        ----------
+        y : np.ndarray of shape (n_samples,)
+            True binary targets (unused; kept for API consistency).
+        F : np.ndarray of shape (n_samples,)
+            Current raw ensemble predictions (log-odds).
+
+        Returns
+        -------
+        np.ndarray of shape (n_samples,)
+        """
         p = sigmoid(F)
         return p * (1.0 - p)
 
@@ -38,6 +65,18 @@ class LogisticObjective(BaseObjective):
         self,
         y: np.ndarray,
     ) -> float:
+        """
+        Compute log-odds of the positive-class rate as the initial prediction.
+
+        Parameters
+        ----------
+        y : np.ndarray of shape (n_samples,)
+            True binary targets in {0, 1}.
+
+        Returns
+        -------
+        float
+        """
         p = float(y.mean())
         p = np.clip(p, 1e-7, 1 - 1e-7)
         return float(np.log(p / (1.0 - p)))
@@ -68,10 +107,18 @@ class SoftmaxObjective(BaseObjective):
         F: np.ndarray,
     ) -> np.ndarray:
         """
+        Compute per-class pseudo-residuals.
+
         Parameters
         ----------
-        y : (n_samples, n_classes) one-hot encoded targets.
-        F : (n_samples, n_classes) raw log-scores.
+        y : np.ndarray of shape (n_samples, n_classes)
+            One-hot encoded targets.
+        F : np.ndarray of shape (n_samples, n_classes)
+            Raw log-scores.
+
+        Returns
+        -------
+        np.ndarray of shape (n_samples, n_classes)
         """
         return y - softmax(F, axis=1)
 
@@ -80,7 +127,20 @@ class SoftmaxObjective(BaseObjective):
         y: np.ndarray,
         F: np.ndarray,
     ) -> np.ndarray:
-        """Diagonal of the per-class Hessian: p_k * (1 - p_k)."""
+        """
+        Diagonal of the per-class Hessian: p_k * (1 - p_k).
+
+        Parameters
+        ----------
+        y : np.ndarray of shape (n_samples, n_classes)
+            One-hot encoded targets (unused; kept for API consistency).
+        F : np.ndarray of shape (n_samples, n_classes)
+            Raw log-scores.
+
+        Returns
+        -------
+        np.ndarray of shape (n_samples, n_classes)
+        """
         p = softmax(F, axis=1)
         return p * (1.0 - p)
 
@@ -101,4 +161,5 @@ class SoftmaxObjective(BaseObjective):
         self,
         raw: np.ndarray,
     ) -> np.ndarray:
+        """Map raw log-scores to class probabilities via softmax."""
         return softmax(raw, axis=1)

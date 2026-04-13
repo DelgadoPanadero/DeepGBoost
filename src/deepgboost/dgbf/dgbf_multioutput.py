@@ -106,8 +106,10 @@ class DGBFMultiOutputModel:
 
         Parameters
         ----------
-        X : (n_samples, n_features)
-        y : (n_samples, K) one-hot encoded targets
+        X : np.ndarray of shape (n_samples, n_features)
+            Training feature matrix.
+        y : np.ndarray of shape (n_samples, K)
+            One-hot encoded targets.
         callbacks : list of TrainingCallback, optional
         evals : list of (X_val, y_val_onehot, name) tuples, optional
 
@@ -229,11 +231,13 @@ class DGBFMultiOutputModel:
 
         Parameters
         ----------
-        X : (n_samples, n_features)
-        pseudo_y : (n_samples, K)
+        X : np.ndarray of shape (n_samples, n_features)
+            Training feature matrix.
+        pseudo_y : np.ndarray of shape (n_samples, K)
+            Shrunk per-class pseudo-residuals for this layer.
         layer_idx : int
         rng : np.random.Generator
-        hessian : (n_samples, K)
+        hessian : np.ndarray of shape (n_samples, K)
             Per-sample per-class Hessian.
         n_samples : int
         K : int
@@ -340,6 +344,7 @@ class DGBFMultiOutputModel:
             )
 
     def get_params(self) -> dict:
+        """Return a dictionary of all constructor parameters and their values."""
         return {
             "n_trees": self.n_trees,
             "n_layers": self.n_layers,

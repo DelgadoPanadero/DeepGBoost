@@ -120,7 +120,19 @@ def weight_solver(
 def sigmoid(
     x: np.ndarray,
 ) -> np.ndarray:
-    """Numerically stable sigmoid."""
+    """
+    Numerically stable sigmoid function.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Input array of any shape.
+
+    Returns
+    -------
+    np.ndarray
+        Element-wise sigmoid values in (0, 1).
+    """
     return np.where(
         x >= 0,
         1.0 / (1.0 + np.exp(-x)),
@@ -132,7 +144,22 @@ def softmax(
     x: np.ndarray,
     axis: int = -1,
 ) -> np.ndarray:
-    """Row-wise softmax with numerical stability."""
+    """
+    Row-wise softmax with numerical stability via max subtraction.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Input array of any shape.
+    axis : int, default=-1
+        Axis along which softmax is computed.
+
+    Returns
+    -------
+    np.ndarray
+        Array of the same shape as ``x`` with values in (0, 1) summing
+        to 1 along ``axis``.
+    """
     shifted = x - x.max(axis=axis, keepdims=True)
     exp_x = np.exp(shifted)
     return exp_x / exp_x.sum(axis=axis, keepdims=True)

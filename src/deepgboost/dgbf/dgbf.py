@@ -149,8 +149,10 @@ class DGBFModel:
 
         Parameters
         ----------
-        X : (n_samples, n_features)
-        y : (n_samples,)
+        X : np.ndarray of shape (n_samples, n_features)
+            Training feature matrix.
+        y : np.ndarray of shape (n_samples,)
+            Training targets.
         callbacks : list of TrainingCallback, optional
         evals : list of (X_val, y_val, name) tuples, optional
             Validation sets for evaluation monitoring.
@@ -323,12 +325,13 @@ class DGBFModel:
 
         Parameters
         ----------
-        X : (n_samples, n_features)
-        pseudo_y : (n_samples,)
+        X : np.ndarray of shape (n_samples, n_features)
+            Training feature matrix.
+        pseudo_y : np.ndarray of shape (n_samples,)
             Shrunk pseudo-residuals for this layer.
         layer_idx : int
         rng : np.random.Generator
-        hessian : (n_samples,) or None
+        hessian : np.ndarray of shape (n_samples,) or None
             Per-sample Hessian values used as tree fitting sample weights.
         n_trees_override : int or None
             Effective number of trees to fit for this layer.  When ``None``
@@ -420,7 +423,17 @@ class DGBFModel:
         self,
         X: np.ndarray,
     ) -> np.ndarray:
-        """Return predictions before applying the output transform."""
+        """
+        Return predictions before applying the output transform.
+
+        Parameters
+        ----------
+        X : np.ndarray of shape (n_samples, n_features)
+
+        Returns
+        -------
+        np.ndarray of shape (n_samples,)
+        """
         self._check_is_fitted()
         return self._predictor.predict_raw(self, X)
 
@@ -435,6 +448,7 @@ class DGBFModel:
             )
 
     def get_params(self) -> dict:
+        """Return a dictionary of all constructor parameters and their values."""
         return {
             "n_trees": self.n_trees,
             "n_layers": self.n_layers,
