@@ -28,6 +28,12 @@ class AbstractModelTest:
     def metric_name(self) -> str:
         return "R2"
 
+    def _results_exist(self, name: str) -> bool:
+        file_name = os.path.join(
+            RESULTS_DIR, f"{name.replace(' ', '_').lower()}.json"
+        )
+        return os.path.exists(file_name)
+
     def _save_summary(self, name, scores_dict):
         model_names = list(scores_dict.keys())
         reference = model_names[-1]

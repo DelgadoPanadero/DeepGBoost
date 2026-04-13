@@ -82,12 +82,12 @@ class TestDeepGBoostMultiClassifierMulticlass:
         for w in clf.model_.weights_:
             assert w.shape == (K, T)
 
-    def test_trees_are_multi_output(self, multiclass_split):
+    def test_trees_are_single_output(self, multiclass_split):
         X_train, _, y_train, _ = multiclass_split
         clf = clone(self._CLF).fit(X_train, y_train)
-        first_tree = clf.model_.graph_[0][0]
-        # sklearn's n_outputs_ == K confirms multi-output training
-        assert first_tree._tree.n_outputs_ == clf.n_classes_
+        # graph_[layer][class_idx][tree_idx]; each tree is single-output
+        first_tree = clf.model_.graph_[0][0][0]
+        assert first_tree._tree.n_outputs_ == 1
 
     def test_feature_importances(self, multiclass_split):
         X_train, _, y_train, _ = multiclass_split
@@ -162,7 +162,55 @@ class TestDeepGBoostMultiClassifierBinary:
         for w in clf.model_.weights_:
             assert w.shape == (2, clf.n_trees)
 
-    def test_binary_trees_are_multi_output(self, binary_split):
+    def test_binary_trees_are_single_output(self, binary_split):
         X_train, _, y_train, _ = binary_split
         clf = clone(self._CLF).fit(X_train, y_train)
-        assert clf.model_.graph_[0][0]._tree.n_outputs_ == 2
+        # graph_[layer][class_idx][tree_idx]; each tree is single-output
+        assert clf.model_.graph_[0][0][0]._tree.n_outputs_ == 1
+
+
+# ---------------------------------------------------------------------------
+# Graph structure
+# ---------------------------------------------------------------------------
+
+
+class TestGraphStructure:
+    """Verify graph structure: K independent single-output tree groups per layer."""
+
+    def test_graph_structure(self):
+        X, y = load_iris(return_X_y=True)
+        K = 3
+        n_trees = 3
+        clf = DeepGBoostMultiClassifier(
+            n_trees=n_trees, n_layers=5, random_state=0
+        )
+        clf.fit(X, y)
+        first_layer = clf.model_.graph_[0]
+        # Must be a list of K lists, each containing n_trees TreeUpdaters
+        assert isinstance(first_layer, list)
+        assert len(first_layer) == K
+        for class_trees in first_layer:
+            assert isinstance(class_trees, list)
+            assert len(class_trees) == n_trees
+
+
+# ---------------------------------------------------------------------------
+# min_weight_fraction_leaf
+# ---------------------------------------------------------------------------
+
+
+class TestMinWeightFractionLeaf:
+    """Verify min_weight_fraction_leaf is accepted and does not break inference."""
+
+    def test_min_weight_fraction_leaf_fits(self):
+        X, y = load_iris(return_X_y=True)
+        clf = DeepGBoostMultiClassifier(
+            n_trees=3,
+            n_layers=5,
+            min_weight_fraction_leaf=0.01,
+            random_state=0,
+        )
+        clf.fit(X, y)
+        proba = clf.predict_proba(X)
+        assert proba.shape == (150, 3)
+        np.testing.assert_allclose(proba.sum(axis=1), 1.0, atol=1e-6)

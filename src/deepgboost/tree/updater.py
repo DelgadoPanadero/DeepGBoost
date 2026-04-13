@@ -24,6 +24,12 @@ class TreeUpdater:
         Number of features to consider at each split (passed directly to
         ``DecisionTreeRegressor``).  Use ``"sqrt"`` for the Random Forest
         default.
+    min_weight_fraction_leaf : float, default=0.0
+        Minimum fraction of the total (weighted) number of samples required
+        to be at a leaf node.  Mirrors XGBoost's ``min_child_weight``:
+        leaves whose accumulated Hessian mass falls below this threshold are
+        forbidden.  The default ``0.0`` preserves the original behaviour
+        exactly.
     random_state : int or None
         Seed for the underlying tree splitter.
     """
@@ -32,14 +38,17 @@ class TreeUpdater:
         self,
         max_depth: int | None = None,
         max_features: int | float | str | None = None,
+        min_weight_fraction_leaf: float = 0.0,
         random_state: int | None = None,
     ):
         self.max_depth = max_depth
         self.max_features = max_features
+        self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.random_state = random_state
         self._tree = DecisionTreeRegressor(
             max_depth=max_depth,
             max_features=max_features,
+            min_weight_fraction_leaf=min_weight_fraction_leaf,
             random_state=random_state,
         )
 

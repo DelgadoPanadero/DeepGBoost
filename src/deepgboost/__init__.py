@@ -29,8 +29,8 @@ from .callbacks import EarlyStoppingCallback
 from .callbacks import LearningRateSchedulerCallback
 from .callbacks import EvaluationMonitorCallback
 from .plotting import plot_importance
-from .gbm.dgbf import DGBFModel
-from .gbm.dgbf_multioutput import DGBFMultiOutputModel
+from .dgbf.dgbf import DGBFModel
+from .dgbf.dgbf_multioutput import DGBFMultiOutputModel
 from .objective import get_objective
 from .metric import get_metric
 

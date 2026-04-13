@@ -16,11 +16,12 @@ from __future__ import annotations
 from typing import Sequence
 
 import numpy as np
+from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_is_fitted
 from sklearn.preprocessing import LabelEncoder
 
-from .gbm.dgbf import DGBFModel
+from .dgbf.dgbf import DGBFModel
 from .callbacks.base_callback import TrainingCallback
 from .common.utils import sigmoid, softmax
 from .common.categorical import CategoricalEncoderMixin
@@ -119,12 +120,12 @@ class DeepGBoostClassifier(
 
     def fit(
         self,
-        X,
-        y,
+        X: ArrayLike,
+        y: ArrayLike,
         *,
         eval_set: list[tuple] | None = None,
         callbacks: Sequence[TrainingCallback] | None = None,
-        sample_weight=None,
+        sample_weight: ArrayLike | None = None,
     ) -> "DeepGBoostClassifier":
         """
         Fit the classifier.
@@ -231,7 +232,7 @@ class DeepGBoostClassifier(
         model.fit(X, y, callbacks=callbacks, evals=raw_evals)
         return model
 
-    def predict_proba(self, X) -> np.ndarray:
+    def predict_proba(self, X: ArrayLike) -> np.ndarray:
         """
         Probability estimates.
 
@@ -253,7 +254,7 @@ class DeepGBoostClassifier(
             )  # (n_samples, K)
             return softmax(log_odds, axis=1)
 
-    def predict(self, X) -> np.ndarray:
+    def predict(self, X: ArrayLike) -> np.ndarray:
         """
         Predict class labels.
 
@@ -265,7 +266,7 @@ class DeepGBoostClassifier(
         indices = np.argmax(proba, axis=1)
         return self.label_encoder_.inverse_transform(indices)
 
-    def score(self, X, y, sample_weight=None) -> float:
+    def score(self, X: ArrayLike, y: ArrayLike, sample_weight: ArrayLike | None = None) -> float:
         """Return accuracy."""
         return float(np.mean(self.predict(X) == np.asarray(y)))
 

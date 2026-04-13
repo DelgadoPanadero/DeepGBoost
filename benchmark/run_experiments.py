@@ -12,6 +12,7 @@ if __name__ == "__main__":
 
     runner = ExperimentRunner(config)
     runner.run()
+    runner.run_ablations()
 
     benchmark = BenchmarkGenerator()
     benchmark.save()

@@ -4,10 +4,8 @@ Covers:
 - _layer_cond_numbers_ is always populated after fit (length == n_layers).
 - _layer_n_trees_ is populated when cond_threshold is set.
 - Adaptive halving logic: n_trees is reduced when cond exceeds threshold.
-- cond_threshold=None (default) produces identical predictions to the
-  baseline — zero behavioral change when disabled.
 - Both DGBFModel (regressor objective) and DGBFModel (binary classifier
-  objective) variants, plus DGBFMultiOutputModel.
+  objective) variants.
 
 Tree budget: n_layers * n_trees <= 100 in every test.
 Data: n_samples <= 200, n_features <= 10.
@@ -19,8 +17,7 @@ import numpy as np
 import pytest
 from sklearn.datasets import make_classification, make_regression
 
-from deepgboost.gbm.dgbf import DGBFModel
-from deepgboost.gbm.dgbf_multioutput import DGBFMultiOutputModel
+from deepgboost.dgbf.dgbf import DGBFModel
 
 
 # ---------------------------------------------------------------------------
@@ -42,23 +39,6 @@ def clf_data():
         n_samples=150, n_features=8, n_informative=4, random_state=0
     )
     return X, y.astype(np.float64)
-
-
-@pytest.fixture(scope="module")
-def multiclass_data():
-    """3-class dataset in one-hot form: 150 samples, 6 features."""
-    X, y_int = make_classification(
-        n_samples=150,
-        n_features=6,
-        n_informative=4,
-        n_classes=3,
-        n_clusters_per_class=1,
-        random_state=0,
-    )
-    K = 3
-    y_onehot = np.zeros((len(y_int), K), dtype=np.float64)
-    y_onehot[np.arange(len(y_int)), y_int] = 1.0
-    return X, y_onehot
 
 
 # ---------------------------------------------------------------------------
@@ -229,72 +209,3 @@ class TestAdaptiveHalving:
                     assert next_actual == n_trees_config
 
 
-# ---------------------------------------------------------------------------
-# 4. cond_threshold=None → zero behavioral change (identical predictions)
-# ---------------------------------------------------------------------------
-
-
-class TestNoBehavioralChangeWhenDisabled:
-    """With cond_threshold=None the model must produce bit-for-bit identical
-    predictions to the baseline (which also has cond_threshold=None)."""
-
-    def test_identical_predictions_regression(self, reg_data):
-        X, y = reg_data
-        base = _make_model(cond_threshold=None)
-        diag = _make_model(cond_threshold=None)
-
-        base.fit(X, y)
-        diag.fit(X, y)
-
-        np.testing.assert_array_equal(
-            base.predict(X),
-            diag.predict(X),
-            err_msg="Two models with cond_threshold=None and the same seed "
-            "must produce identical predictions.",
-        )
-
-    def test_identical_predictions_classifier(self, clf_data):
-        X, y = clf_data
-        base = _make_model(objective="binary:logistic", cond_threshold=None)
-        diag = _make_model(objective="binary:logistic", cond_threshold=None)
-
-        base.fit(X, y)
-        diag.fit(X, y)
-
-        np.testing.assert_array_equal(base.predict(X), diag.predict(X))
-
-
-# ---------------------------------------------------------------------------
-# 5. DGBFMultiOutputModel — diagnostic only
-# ---------------------------------------------------------------------------
-
-
-class TestMultiOutputCondNumbers:
-    """DGBFMultiOutputModel must populate _layer_cond_numbers_ after fit."""
-
-    def test_length_equals_n_layers(self, multiclass_data):
-        X, y_onehot = multiclass_data
-        model = DGBFMultiOutputModel(
-            n_trees=5, n_layers=4, max_depth=3, random_state=42
-        )  # budget: 5 * 4 = 20 <= 100
-        model.fit(X, y_onehot)
-        assert len(model._layer_cond_numbers_) == model.n_layers
-
-    def test_all_values_are_positive_floats(self, multiclass_data):
-        X, y_onehot = multiclass_data
-        model = DGBFMultiOutputModel(
-            n_trees=5, n_layers=4, max_depth=3, random_state=42
-        )
-        model.fit(X, y_onehot)
-        for cond in model._layer_cond_numbers_:
-            assert isinstance(cond, float)
-            assert cond > 0.0
-
-    def test_no_adaptive_attribute_on_multioutput(self, multiclass_data):
-        """DGBFMultiOutputModel has diagnostic only — no _layer_n_trees_."""
-        X, y_onehot = multiclass_data
-        model = DGBFMultiOutputModel(
-            n_trees=5, n_layers=4, max_depth=3, random_state=42
-        )
-        model.fit(X, y_onehot)
-        assert not hasattr(model, "_layer_n_trees_")

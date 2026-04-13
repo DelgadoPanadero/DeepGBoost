@@ -16,11 +16,12 @@ from __future__ import annotations
 from typing import Sequence
 
 import numpy as np
+from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
 from sklearn.base import RegressorMixin
 from sklearn.utils.validation import check_is_fitted
 
-from .gbm.dgbf import DGBFModel
+from .dgbf.dgbf import DGBFModel
 from .callbacks.base_callback import TrainingCallback
 from .common.categorical import CategoricalEncoderMixin
 
@@ -124,12 +125,12 @@ class DeepGBoostRegressor(
 
     def fit(
         self,
-        X,
-        y,
+        X: ArrayLike,
+        y: ArrayLike,
         *,
         eval_set: list[tuple] | None = None,
         callbacks: Sequence[TrainingCallback] | None = None,
-        sample_weight=None,
+        sample_weight: ArrayLike | None = None,
     ) -> "DeepGBoostRegressor":
         """
         Fit the DeepGBoost regressor.
@@ -193,7 +194,7 @@ class DeepGBoostRegressor(
         self.n_features_in_ = X.shape[1]
         return self
 
-    def predict(self, X) -> np.ndarray:
+    def predict(self, X: ArrayLike) -> np.ndarray:
         """
         Predict regression targets.
 
@@ -211,9 +212,9 @@ class DeepGBoostRegressor(
 
     def score(
         self,
-        X,
-        y,
-        sample_weight=None,
+        X: ArrayLike,
+        y: ArrayLike,
+        sample_weight: ArrayLike | None = None,
     ) -> float:
         """Return the R² coefficient of determination."""
         check_is_fitted(self, "model_")

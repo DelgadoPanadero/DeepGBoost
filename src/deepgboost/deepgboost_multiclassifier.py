@@ -16,11 +16,12 @@ from __future__ import annotations
 from typing import Sequence
 
 import numpy as np
+from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_is_fitted
 from sklearn.preprocessing import LabelEncoder, label_binarize
 
-from .gbm.dgbf_multioutput import DGBFMultiOutputModel
+from .dgbf.dgbf_multioutput import DGBFMultiOutputModel
 from .callbacks.base_callback import TrainingCallback
 from .common.utils import softmax
 from .common.categorical import CategoricalEncoderMixin
@@ -47,6 +48,11 @@ class DeepGBoostMultiClassifier(
     max_features : int, float, str or None, default=None
         Features to consider at each split.  ``None`` uses all features.
         Set to ``"sqrt"`` for Random Forest-style feature subsampling.
+    min_weight_fraction_leaf : float, default=0.0
+        Minimum fraction of the total (weighted) number of samples required
+        to be at a leaf node.  Prevents leaves with small accumulated
+        Hessian mass, analogous to XGBoost's ``min_child_weight``.
+        The default ``0.0`` preserves the original behaviour exactly.
     learning_rate : float, default=0.1
         Shrinkage factor.
     subsample_min_frac : float, default=0.3
@@ -72,6 +78,7 @@ class DeepGBoostMultiClassifier(
         n_layers: int = 20,
         max_depth: int | None = None,
         max_features: int | float | str | None = None,
+        min_weight_fraction_leaf: float = 0.0,
         learning_rate: float = 0.1,
         subsample_min_frac: float = 0.3,
         weight_solver: str = "nnls",
@@ -85,6 +92,7 @@ class DeepGBoostMultiClassifier(
         self.n_layers = n_layers
         self.max_depth = max_depth
         self.max_features = max_features
+        self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.learning_rate = learning_rate
         self.subsample_min_frac = subsample_min_frac
         self.weight_solver = weight_solver
@@ -112,12 +120,12 @@ class DeepGBoostMultiClassifier(
 
     def fit(
         self,
-        X,
-        y,
+        X: ArrayLike,
+        y: ArrayLike,
         *,
         eval_set: list[tuple] | None = None,
         callbacks: Sequence[TrainingCallback] | None = None,
-        sample_weight=None,
+        sample_weight: ArrayLike | None = None,
     ) -> "DeepGBoostMultiClassifier":
         """
         Fit the classifier.
@@ -168,6 +176,7 @@ class DeepGBoostMultiClassifier(
             n_layers=self.n_layers,
             max_depth=self.max_depth,
             max_features=self.max_features,
+            min_weight_fraction_leaf=self.min_weight_fraction_leaf,
             learning_rate=self.learning_rate,
             subsample_min_frac=self.subsample_min_frac,
             weight_solver=self.weight_solver,
@@ -178,7 +187,7 @@ class DeepGBoostMultiClassifier(
 
         return self
 
-    def predict_proba(self, X) -> np.ndarray:
+    def predict_proba(self, X: ArrayLike) -> np.ndarray:
         """
         Probability estimates.
 
@@ -192,7 +201,7 @@ class DeepGBoostMultiClassifier(
         F = self.model_.predict_raw(X)  # (n_samples, K)
         return softmax(F, axis=1)
 
-    def predict(self, X) -> np.ndarray:
+    def predict(self, X: ArrayLike) -> np.ndarray:
         """
         Predict class labels.
 
@@ -204,7 +213,7 @@ class DeepGBoostMultiClassifier(
         indices = np.argmax(proba, axis=1)
         return self.label_encoder_.inverse_transform(indices)
 
-    def score(self, X, y, sample_weight=None) -> float:
+    def score(self, X: ArrayLike, y: ArrayLike, sample_weight: ArrayLike | None = None) -> float:
         """Return accuracy."""
         return float(np.mean(self.predict(X) == np.asarray(y)))
 

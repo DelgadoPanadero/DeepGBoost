@@ -61,6 +61,7 @@ def weight_solver(
     tree_pred: np.ndarray,
     y_real: np.ndarray,
     method: str = "nnls",
+    sample_weight: np.ndarray | None = None,
 ) -> np.ndarray:
     """
     Compute combination weights for the T bagged trees in a layer.
@@ -81,6 +82,10 @@ def weight_solver(
                         ``n_layers=1`` and ``learning_rate=1.0`` this makes
                         DeepGBoost mathematically equivalent to
                         RandomForest.
+    sample_weight : np.ndarray of shape (n_samples,) or None
+        Optional per-sample weights.  When provided, both ``tree_pred`` and
+        ``y_real`` are pre-multiplied by ``sqrt(sample_weight)`` before NNLS
+        so the solver minimises the Hessian-weighted residual norm.
 
     Returns
     -------
@@ -93,7 +98,13 @@ def weight_solver(
         return np.full(n_outputs, 1.0 / n_outputs)
 
     if method == "nnls":
-        weights, _ = nnls(tree_pred, y_real)
+        if sample_weight is not None:
+            sw = np.sqrt(np.clip(sample_weight, 1e-6, None))
+            A = tree_pred * sw[:, np.newaxis]
+            b = y_real * sw
+        else:
+            A, b = tree_pred, y_real
+        weights, _ = nnls(A, b)
     else:
         raise ValueError(
             f"Unknown weight_solver method: '{method}'. "

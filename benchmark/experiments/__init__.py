@@ -1,2 +1,4 @@
 from .bootstrap_test import BootstrapModelTest
 from .crossvalidation_test import CrossValidationModelTest
+from .synthetic_test import SyntheticModelTest
+from .synthetic_correlation_experiment import SyntheticCorrelationExperiment

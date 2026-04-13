@@ -13,11 +13,11 @@ class BenchmarkGenerator:
 
     def _dataset_name(self, path: str) -> str:
         stem = os.path.basename(path).replace(".json", "")
-        name = re.sub(r"_bootstrap_test$", "", stem)
+        name = re.sub(r"_(bootstrap|cross_validation)_test$", "", stem)
         return name.replace("_", " ").title()
 
     def _load_results(self) -> dict[str, dict[str, tuple[float, float]]]:
-        pattern = os.path.join(self._results_dir, "*_bootstrap_test.json")
+        pattern = os.path.join(self._results_dir, "*_cross_validation_test.json")
         data: dict[str, dict[str, tuple[float, float]]] = {}
         for path in sorted(glob.glob(pattern)):
             dataset = self._dataset_name(path)

@@ -10,7 +10,7 @@ from deepgboost import DeepGBoostRegressor
 from deepgboost.callbacks import EarlyStoppingCallback
 from deepgboost.callbacks import EvaluationMonitorCallback
 from deepgboost.callbacks import LearningRateSchedulerCallback
-from deepgboost.gbm.dgbf import DGBFModel
+from deepgboost.dgbf.dgbf import DGBFModel
 
 
 # ---------------------------------------------------------------------------

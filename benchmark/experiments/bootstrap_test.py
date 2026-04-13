@@ -39,6 +39,11 @@ class BootstrapModelTest(AbstractModelTest):
             yield X_train, y_train, X_test, y_test
 
     def run(self, name, X, y):
+        full_name = f"{name} Bootstrap Test"
+        if self._results_exist(full_name):
+            print(f"Skipping '{full_name}' (already exists)")
+            return
+
         scores = {
             model.name: np.zeros((self._n_runs,)) for model in self._models
         }
@@ -50,7 +55,7 @@ class BootstrapModelTest(AbstractModelTest):
                 y_pred = model.fit(X_train, y_train).predict(X_test)
                 scores[model.name][i] = self.score(y_test, y_pred)
 
-        name = f"{name} Bootstrap Test"
+        name = full_name
         self._save_scores(name, scores)
         self._save_summary(name, scores)
         self._plot_scores(name, scores, self._n_bins)

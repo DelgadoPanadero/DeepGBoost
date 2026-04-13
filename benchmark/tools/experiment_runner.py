@@ -9,6 +9,9 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
+from benchmark.experiments import BootstrapModelTest
+from benchmark.models import DeepGBoostClassifierModel
+
 BENCHMARK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -29,6 +32,8 @@ class ExperimentRunner:
             self._load_experiments(config)
         except:
             raise Exception("Error loading experiment modules")
+
+        self._load_ablations(config)
 
     @property
     def models(self):
@@ -139,3 +144,55 @@ class ExperimentRunner:
             experiments = self._build_experiments_for_task(task)
             for name, experiment in experiments.items():
                 experiment.run(dataset_name, X, y)
+
+    def _load_ablations(self, config):
+        self._ablation_configs = config.get("Ablations", [])
+
+    def run_ablations(self):
+        if not self._ablation_configs:
+            return
+
+        # Resolve default DeepGBoost params from the classification config (last entry).
+        clf_models = list(self._model_configs["classification"].values())
+        dgb_defaults = clf_models[-1]["parameters"] if clf_models else {}
+
+        classification_datasets = {
+            name: (X, y)
+            for name, (X, y, task) in self._datasets.items()
+            if task == "classification"
+        }
+
+        for ablation in self._ablation_configs:
+            tag = ablation["tag"]
+            n_layers = ablation.get("n_layers", dgb_defaults.get("n_layers"))
+            n_trees = ablation.get("n_trees", dgb_defaults.get("n_trees"))
+            learning_rate = ablation.get("learning_rate", dgb_defaults.get("learning_rate"))
+            max_depth = ablation.get("max_depth", dgb_defaults.get("max_depth"))
+            min_weight_fraction_leaf = ablation.get(
+                "min_weight_fraction_leaf", dgb_defaults.get("min_weight_fraction_leaf")
+            )
+            n_runs = ablation.get("n_runs", 5)
+            test_size = ablation.get("test_size", 0.25)
+
+            for dataset_name, (X, y) in classification_datasets.items():
+                # Fresh baseline instances (all classification models except the last).
+                baseline_models = [
+                    getattr(import_module(mc["module"]), mc["object"])(**mc["parameters"])
+                    for mc in clf_models[:-1]
+                ]
+                dgb_model = DeepGBoostClassifierModel(
+                    n_layers=n_layers,
+                    n_trees=n_trees,
+                    learning_rate=learning_rate,
+                    max_depth=max_depth,
+                    min_weight_fraction_leaf=min_weight_fraction_leaf,
+                )
+                models = baseline_models + [dgb_model]
+
+                test = BootstrapModelTest(
+                    models=models,
+                    task="classification",
+                    n_runs=n_runs,
+                    test_size=test_size,
+                )
+                test.run(f"{dataset_name} Ablation {tag}", X, y)

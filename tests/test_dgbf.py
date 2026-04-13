@@ -15,7 +15,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
 from deepgboost import DeepGBoostRegressor
-from deepgboost.gbm.dgbf import DGBFModel
+from deepgboost.dgbf.dgbf import DGBFModel
 from deepgboost.predictor.predictor import DeepGBoostPredictor
 from deepgboost.tree.updater import TreeUpdater
 

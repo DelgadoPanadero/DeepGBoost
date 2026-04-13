@@ -36,3 +36,7 @@ plotting = ["matplotlib>=3.7"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff.lint]
+select = ["COM812"]
+fixable = ["COM812"]
