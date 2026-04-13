@@ -3,6 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/deepgboost.svg)](https://pypi.python.org/pypi/deepgboost/)
 [![CI](https://github.com/DelgadoPanadero/DeepGBoost/actions/workflows/ci.yml/badge.svg)](https://github.com/DelgadoPanadero/DeepGBoost/actions/workflows/ci.yml)
 [![Coverage](https://codecov.io/gh/DelgadoPanadero/DeepGBoost/branch/main/graph/badge.svg)](https://codecov.io/gh/DelgadoPanadero/DeepGBoost)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![PythonVersion](https://img.shields.io/pypi/pyversions/deepgboost.svg)](https://pypi.org/project/deepgboost/)
 
 Machine Learning algorithm based on gradient boosting forest that merges the power of tree ensembles with neural network architectures.
@@ -15,11 +16,20 @@ Machine Learning algorithm based on gradient boosting forest that merges the pow
 pip install deepgboost
 ```
 
+Optional plotting support:
+
+```bash
+pip install deepgboost[plotting]
+```
+
 To install from source with development dependencies:
 
 ```bash
-pip install -e '.[dev]'
+git clone https://github.com/PanaderoDelgado/DeepGBoost.git
+cd DeepGBoost
+pip install -e .
 ```
+
 
 ## 🚀 Usage
 
@@ -31,7 +41,8 @@ from sklearn.model_selection import train_test_split
 from deepgboost import DeepGBoostRegressor
 
 X, y = load_diabetes(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
 
 model = DeepGBoostRegressor(
     n_trees=10,
