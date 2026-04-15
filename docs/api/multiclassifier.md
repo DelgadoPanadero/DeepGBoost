@@ -1,0 +1,3 @@
+# DeepGBoostMultiClassifier
+
+::: deepgboost.DeepGBoostMultiClassifier
