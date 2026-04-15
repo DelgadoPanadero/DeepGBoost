@@ -50,8 +50,9 @@ class LinearUpdater:
 
         Parameters
         ----------
-        X_sub : (n_sub, n_features)
-        pseudo_y_mean_sub : (n_sub,)
+        X_sub : np.ndarray of shape (n_sub, n_features)
+            Bootstrap subsample of training features.
+        pseudo_y_mean_sub : np.ndarray of shape (n_sub,)
             Mean pseudo-residuals across tree slots.
 
         Returns
@@ -76,8 +77,10 @@ class LinearUpdater:
 
     @property
     def coef_(self) -> np.ndarray:
+        """Coefficients of the fitted Ridge model."""
         return self._ridge.coef_
 
     @property
     def intercept_(self) -> float:
+        """Intercept of the fitted Ridge model."""
         return float(self._ridge.intercept_)

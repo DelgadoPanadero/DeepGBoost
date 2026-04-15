@@ -224,6 +224,7 @@ class DeepGBoostRegressor(
 
     @property
     def feature_importances_(self) -> np.ndarray:
+        """Impurity-based feature importances from the underlying DGBF model."""
         check_is_fitted(self, "model_")
 
         if (feature_importances := self.model_.feature_importances_) is None:
@@ -233,5 +234,6 @@ class DeepGBoostRegressor(
 
     @property
     def evals_result_(self) -> dict:
+        """Evaluation results logged during training, keyed by dataset name."""
         check_is_fitted(self, "model_")
         return self.model_.evals_result_

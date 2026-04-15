@@ -21,7 +21,25 @@ METRICS: dict[str, type] = {
 
 
 def get_metric(name: str):
-    """Return a metric instance by name string."""
+    """
+    Return a metric instance by name string.
+
+    Parameters
+    ----------
+    name : str
+        Metric alias.  Must be one of ``"rmse"``, ``"mae"``, ``"r2"``,
+        ``"accuracy"``, ``"logloss"``, ``"auc"``.
+
+    Returns
+    -------
+    BaseMetric
+        An instantiated metric object.
+
+    Raises
+    ------
+    ValueError
+        If ``name`` is not a registered metric alias.
+    """
     if name not in METRICS:
         raise ValueError(
             f"Unknown metric '{name}'. Available: {list(METRICS.keys())}",

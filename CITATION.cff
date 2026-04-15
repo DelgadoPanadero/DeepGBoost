@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use DeepGBoost in your research, please cite the following paper."
+type: software
+title: DeepGBoost
+version: 0.3.0
+repository-code: https://github.com/DelgadoPanadero/DeepGBoost
+license: Apache-2.0
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Delgado-Panadero
+      given-names: Ángel
+    - family-names: Benítez-Andrades
+      given-names: José Alberto
+    - family-names: García-Ordás
+      given-names: María Teresa
+  title: "A generalized decision tree ensemble based on the NeuralNetworks architecture: Distributed Gradient Boosting Forest (DGBF)"
+  journal: Applied Intelligence
+  volume: 53
+  start: 22991
+  end: 23003
+  year: 2023
+  doi: 10.1007/s10489-023-04735-w

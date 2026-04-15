@@ -1,6 +1,34 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions"
+    "allow": [
+      "Read(**)",
+      "Write(**)",
+      "Edit(**)",
+      "Glob(**)",
+      "Grep(**)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(curl *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(source *)",
+      "Bash(docker *)",
+      "Bash(.venv/bin/pip *)",
+      "Bash(.venv/bin/pip3 *)",
+      "Bash(.venv/bin/pytest *)",
+      "Bash(.venv/bin/mkdocs *)",
+      "Bash(.venv/bin/ruff *)",
+      "Bash(.venv/bin/pre-commit *)",
+      "Bash(.venv/bin/python *)",
+      "Bash(.venv/bin/python3 *)",
+      "Bash(.venv/bin/jupyter *)"
+    ],
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm -rf /*)",
+      "Bash(pip install *)",
+      "Bash(pip3 install *)"
+    ]
   },
   "enabledMcpjsonServers": ["github"]
 }
