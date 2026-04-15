@@ -27,6 +27,9 @@ theme:
 
 plugins:
   - search
+  - mkdocs-jupyter:
+      execute: false
+      include_source: true
   - mkdocstrings:
       handlers:
         python:
@@ -39,6 +42,11 @@ plugins:
 
 nav:
   - Home: index.md
+  - Examples:
+    - Quick Start: examples/quickstart.ipynb
+    - Regressor: examples/regressor.ipynb
+    - Classifier: examples/classifier.ipynb
+    - Serialization: examples/serialization.ipynb
   - API Reference:
     - Estimators:
       - DeepGBoostRegressor: api/regressor.md
