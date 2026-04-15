@@ -1,3 +1,7 @@
+---
+description: DeepGBoost training callbacks — EarlyStopping, EvaluationMonitor, and LearningRateScheduler hooks for the DGBF training loop. Compatible with fit() via the callbacks parameter.
+---
+
 # Callbacks
 
 ::: deepgboost.callbacks.base_callback.TrainingCallback
