@@ -6,6 +6,8 @@
 
 Machine learning algorithm based on gradient boosting forest that merges the power of tree ensembles with neural network architectures.
 
+<div align="center"><img src="img/icon.svg" width="60%"></div>
+
 ## Algorithm
 
 DeepGBoost implements the **Distributed Gradient Boosting Forest (DGBF)**, introduced in:
@@ -21,6 +23,21 @@ $$F(x) = \sum_{l=1}^{L} RF_l(x) = \frac{1}{T} \sum_{l=0}^{L} \sum_{t=0}^{T} h_{l
 where *L* is the number of boosting layers and *T* is the number of trees per layer. Each RandomForest layer is the analogue of a dense network layer, with distributed gradients replacing back-propagation.
 
 RandomForest (*L* = 1) and GradientBoosting (*T* = 1) are recovered as special cases.
+
+<div align="center">
+  <img src="img/fig1.png" width="80%">
+  <p><strong>Fig. 1</strong> — NeuralNetwork vs DGBF architecture</p>
+</div>
+
+<div align="center">
+  <img src="img/fig2.png" width="80%">
+  <p><strong>Fig. 2</strong> — RandomForest & GradientBoosting as DGBF special cases</p>
+</div>
+
+<div align="center">
+  <img src="img/benchmark.png" width="80%">
+  <p><strong>Fig. 3</strong> — Benchmark results across 9 UCI datasets</p>
+</div>
 
 ## Installation
 
