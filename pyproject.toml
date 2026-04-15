@@ -38,6 +38,8 @@ docs = [
     "mkdocs-material>=9.5",
     "mkdocstrings[python]>=0.25",
     "mkdocs-jupyter>=0.24",
+    "pillow>=10.0",
+    "cairosvg>=2.7",
 ]
 
 [tool.setuptools.packages.find]

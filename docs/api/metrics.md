@@ -1,5 +1,9 @@
 ---
 description: DeepGBoost evaluation metrics — RMSE, MAE, R², accuracy, log-loss, and AUC. Used for early stopping monitoring and eval set reporting during training.
+tags:
+  - metrics
+  - evaluation
+  - API
 ---
 
 # Metrics

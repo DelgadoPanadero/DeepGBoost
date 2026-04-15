@@ -1,5 +1,11 @@
 ---
 description: DeepGBoost — sklearn-compatible Distributed Gradient Boosting Forest (DGBF) for tabular data. Combines RandomForest and GradientBoosting into a layered graph ensemble without back-propagation.
+tags:
+  - gradient boosting
+  - random forest
+  - ensemble
+  - tabular data
+  - sklearn
 ---
 
 # DeepGBoost
