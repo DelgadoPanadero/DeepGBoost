@@ -8,14 +8,14 @@ theme:
   name: material
   palette:
     - scheme: default
-      primary: indigo
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -30,8 +30,10 @@ plugins:
   - tags
   - social
   - mkdocs-jupyter:
-      execute: false
+      execute: true
       include_source: true
+      allow_errors: false
+      kernel_name: python3
   - mkdocstrings:
       handlers:
         python:
@@ -41,6 +43,9 @@ plugins:
             show_source: true
             show_root_heading: true
             heading_level: 2
+
+extra_css:
+  - stylesheets/extra.css
 
 extra:
   social:
