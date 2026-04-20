@@ -1,3 +1,7 @@
 from .config_parser import ConfigParser
 from .experiment_runner import ExperimentRunner
 from .benchmark_generator import BenchmarkGenerator
+from .academic_config_parser import AcademicConfigParser
+from .academic_experiment_runner import AcademicExperimentRunner
+from .academic_crossvalidation_test import AcademicCrossValidationModelTest
+from .openml_loader import OpenMLLoader

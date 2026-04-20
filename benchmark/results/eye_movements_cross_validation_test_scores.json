@@ -1,0 +1,92 @@
+[
+  {
+    "GradientBoosting": 0.628003983775947,
+    "RandomForest": 0.6568880265976104,
+    "XGBoost": 0.6557042725544387,
+    "DeepGBoost": 0.645200003434503,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.017196019658555994,
+    "diff_DeepGBoost_vs_RandomForest": -0.011688023163107353,
+    "diff_DeepGBoost_vs_XGBoost": -0.010504269119935739
+  },
+  {
+    "GradientBoosting": 0.6307413629720727,
+    "RandomForest": 0.6477369076997689,
+    "XGBoost": 0.6806226489766594,
+    "DeepGBoost": 0.6465177398160316,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.015776376843958828,
+    "diff_DeepGBoost_vs_RandomForest": -0.0012191678837373265,
+    "diff_DeepGBoost_vs_XGBoost": -0.034104909160627805
+  },
+  {
+    "GradientBoosting": 0.6214917690579613,
+    "RandomForest": 0.6449461718440818,
+    "XGBoost": 0.6425718553117956,
+    "DeepGBoost": 0.6359486787999703,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.014456909742008972,
+    "diff_DeepGBoost_vs_RandomForest": -0.00899749304411146,
+    "diff_DeepGBoost_vs_XGBoost": -0.006623176511825313
+  },
+  {
+    "GradientBoosting": 0.642540993225211,
+    "RandomForest": 0.6504164580352128,
+    "XGBoost": 0.6596407125895754,
+    "DeepGBoost": 0.6635970402934547,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.02105604706824371,
+    "diff_DeepGBoost_vs_RandomForest": 0.013180582258241924,
+    "diff_DeepGBoost_vs_XGBoost": 0.003956327703879325
+  },
+  {
+    "GradientBoosting": 0.6053729938553609,
+    "RandomForest": 0.6425570421446399,
+    "XGBoost": 0.6399399767960476,
+    "DeepGBoost": 0.6358128184931636,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.030439824637802704,
+    "diff_DeepGBoost_vs_RandomForest": -0.006744223651476311,
+    "diff_DeepGBoost_vs_XGBoost": -0.004127158302884015
+  },
+  {
+    "GradientBoosting": 0.6202352193545315,
+    "RandomForest": 0.6399213230270794,
+    "XGBoost": 0.6464224972889732,
+    "DeepGBoost": 0.6319791929081588,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.01174397355362733,
+    "diff_DeepGBoost_vs_RandomForest": -0.007942130118920532,
+    "diff_DeepGBoost_vs_XGBoost": -0.014443304380814315
+  },
+  {
+    "GradientBoosting": 0.6228633493243964,
+    "RandomForest": 0.6464921023795106,
+    "XGBoost": 0.6462355096713899,
+    "DeepGBoost": 0.6422629776460012,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.0193996283216048,
+    "diff_DeepGBoost_vs_RandomForest": -0.004229124733509448,
+    "diff_DeepGBoost_vs_XGBoost": -0.00397253202538872
+  },
+  {
+    "GradientBoosting": 0.6380132810444124,
+    "RandomForest": 0.6267604288797008,
+    "XGBoost": 0.6828349379511125,
+    "DeepGBoost": 0.6460556691051846,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.008042388060772288,
+    "diff_DeepGBoost_vs_RandomForest": 0.01929524022548379,
+    "diff_DeepGBoost_vs_XGBoost": -0.03677926884592786
+  },
+  {
+    "GradientBoosting": 0.6366810774858663,
+    "RandomForest": 0.6657802155184355,
+    "XGBoost": 0.6512862067592299,
+    "DeepGBoost": 0.6460029886462609,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.009321911160394603,
+    "diff_DeepGBoost_vs_RandomForest": -0.019777226872174536,
+    "diff_DeepGBoost_vs_XGBoost": -0.005283218112968946
+  },
+  {
+    "GradientBoosting": 0.5878432113161192,
+    "RandomForest": 0.6368395903018719,
+    "XGBoost": 0.630262517767517,
+    "DeepGBoost": 0.6223154562880182,
+    "diff_DeepGBoost_vs_GradientBoosting": 0.034472244971899046,
+    "diff_DeepGBoost_vs_RandomForest": -0.014524134013853662,
+    "diff_DeepGBoost_vs_XGBoost": -0.007947061479498752
+  }
+]

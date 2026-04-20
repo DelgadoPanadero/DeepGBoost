@@ -1,0 +1,40 @@
+[
+  {
+    "model": "GradientBoosting",
+    "mean": 0.967863127667211,
+    "std": 0.004610486071377322
+  },
+  {
+    "model": "RandomForest",
+    "mean": 0.9840309936557186,
+    "std": 0.00240343158406791
+  },
+  {
+    "model": "XGBoost",
+    "mean": 0.9868084147460492,
+    "std": 0.002585761505586601
+  },
+  {
+    "model": "DeepGBoost",
+    "mean": 0.9808563801792047,
+    "std": 0.0017746113725764492
+  },
+  {
+    "diff_reference": "DeepGBoost",
+    "diff_model": "GradientBoosting",
+    "mean": 0.012993252511993758,
+    "std": 0.0036686982078757303
+  },
+  {
+    "diff_reference": "DeepGBoost",
+    "diff_model": "RandomForest",
+    "mean": -0.003174613476513799,
+    "std": 0.0014578594934470531
+  },
+  {
+    "diff_reference": "DeepGBoost",
+    "diff_model": "XGBoost",
+    "mean": -0.005952034566844388,
+    "std": 0.0030091089549950665
+  }
+]

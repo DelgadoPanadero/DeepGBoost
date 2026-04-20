@@ -1,0 +1,22 @@
+[
+  {
+    "model": "GradientBoosting",
+    "mean": 0.8232408342292356,
+    "normalized": 0.927508381614522
+  },
+  {
+    "model": "RandomForest",
+    "mean": 0.8875831750395754,
+    "normalized": 1.0
+  },
+  {
+    "model": "XGBoost",
+    "mean": 0.8790205599791199,
+    "normalized": 0.9903528871420149
+  },
+  {
+    "model": "DeepGBoost",
+    "mean": 0.8384059996697315,
+    "normalized": 0.944594290706726
+  }
+]

@@ -267,3 +267,150 @@ DeepGBoost no tiene este regulador. sklearn `DecisionTreeRegressor` con `sample_
 **Riesgo en otros datasets:** Abalone (3 clases equilibradas, Hessian más uniforme) y Penguins son menos afectados porque sus Hessianos varían menos. CaliforniaHousing y otros regresores usan h=1 uniforme → α actúa como `min_samples_leaf` fraccionario, neutral o ligeramente beneficioso.
 
 **Implementación:** `src/deepgboost/tree/updater.py:40` → añadir `min_weight_fraction_leaf` al constructor de `DecisionTreeRegressor`. Exponer en `TreeUpdater.__init__`, `DGBFMultiOutputModel.__init__`, `DeepGBoostMultiClassifier.__init__`. Default=0.0 para compatibilidad backward.
+
+---
+
+## Análisis de suites de datasets (2026-04-18)
+
+### Suite Dev — evaluación de los 8 datasets actuales
+
+Análisis de sensibilidad de cada dataset para detectar cambios en el algoritmo:
+
+| Dataset | Tamaño | Task | Discriminatividad | Justificación |
+|---|---|---|---|---|
+| Penguins | 333, 3C | classif | BAJA | Demasiado pequeño: la varianza de bootstrap domina sobre diferencias algorítmicas. DGB ya está cerca del techo (~0.99). No discrimina. |
+| BankMarketing | 45k, binario | classif | MEDIA | Desbalanceado (12% positivo). Sensible a cambios en NNLS y regularización. El gap -0.007 vs XGB es real pero no dramático. Mantener. |
+| Abalone | 4177, 3C | classif | ALTA | DGB gana (+0.009 vs XGB). Benchmark de 3 clases equilibradas. Único caso multiclase donde DGB lidera. Mantener. |
+| Adult | 48k, binario | classif | ALTA | Mayor gap (-0.020 vs XGB). Muy sensible a max_depth, min_weight_fraction_leaf, lr. Barómetro de mejoras en regulación. Mantener. |
+| NavalVessel | 11k | regresión | ALTA | DGB gana (+0.009 vs XGB). Features con alta correlación lineal, terreno natural de DGBF. Mantener. |
+| CaliforniaHousing | 20k | regresión | MEDIA | DGB 2º (-0.004 vs XGB). Mezcla numérica/geoespacial. Útil como regresión de tamaño medio. Mantener. |
+| BikeSales | 8k | regresión | ALTA | DGB gana (+0.006 vs XGB). Series temporales tabulares, estacionalidad. Mantener. |
+| Concrete | 1k | regresión | MEDIA | DGB gana (+0.003 vs XGB). Muy pequeño: fluctúa bastante entre runs. Útil como smoke test rápido. |
+
+**Conclusión Dev:** Mantener los 8 datasets actuales. Si hay presión de tiempo, Penguins puede suprimirse (poca discriminatividad, DGB ya en techo). Si se necesita un 9º dataset para reforzar clasificación multiclase, `jannis` (OpenML 45021, 57k muestras, 55 features) sería el candidato natural.
+
+### Suite Academic — subconjunto de Grinsztajn et al. (NeurIPS 2022)
+
+Los cuatro OpenML suites del paper son:
+- Suite 336: regresión numérica (19 datasets)
+- Suite 337: clasificación numérica (16 datasets)
+- Suite 335: regresión categórica (17 datasets) — requiere encoding, más complejo
+- Suite 334: clasificación categórica (7 datasets) — requiere encoding
+
+Para DeepGBoost se propone el subconjunto de suites 336 + 337 (features numéricas) que evitan la complejidad de encoding categórico y son directamente comparables. Ver propuesta detallada en la respuesta del agente.
+
+**Datasets excluidos por tamaño excesivo:**
+- nyc-taxi-green-dec-2016 (did=44143): 581k filas → demasiado lento
+- delays_zurich_transport (did=45034): 5.46M filas → impracticable
+- Higgs (did=44129): 940k filas → impracticable
+- covertype (did=44121): 566k filas → impracticable
+- MiniBooNE (did=44128): 73k filas — borderline, posible incluir
+- medical_charges (did=44146): 163k filas — borderline
+
+---
+
+## Análisis del benchmark académico (2026-04-20) — 18 datasets Grinsztajn, 10-fold CV
+
+### Diagnóstico de pérdidas: clasificación por significancia estadística
+
+Antes de proponer mejoras es necesario distinguir qué pérdidas son reales (sistemáticas) de cuáles son ruido estadístico. Con 10 folds se puede calcular el SNR = |mean_gap| / std_gap:
+
+| Dataset | DGB-XGB mean | std | SNR | Diagnóstico |
+|---|---|---|---|---|
+| Electricity | -0.041 | 0.005 | 8.2 | PÉRDIDA REAL |
+| Pol_Clf | -0.006 | 0.003 | 2.0 | PÉRDIDA REAL (borderline) |
+| Elevators | -0.009 | 0.006 | 1.5 | BORDERLINE |
+| Eye_Movements | -0.012 | 0.013 | 0.9 | RUIDO ESTADÍSTICO |
+| CPU_Act | -0.002 | 0.002 | 1.0 | RUIDO ESTADÍSTICO |
+| Superconduct | +0.003 | 0.003 | 1.0 | DGB GANA en 7/10 folds (tabla original incorrecta) |
+
+**Conclusión:** Solo Electricity (-0.041) y Pol_Clf (-0.006) representan pérdidas reales. Eye_Movements, CPU_Act y Superconduct son estadísticamente indistinguibles de empate.
+
+---
+
+### Causa raíz 1: Degeneration NNLS por n_trees=5 en clasificación (CRÍTICO)
+
+**Observación clave — la asimetría Pol:**
+- `Pol_Reg` (26 features, 10082 muestras, regresión): DGB **gana** +0.005 vs XGB
+- `Pol_Clf` (mismas features, mismas muestras, clasificación): DGB **pierde** -0.006 vs XGB
+
+Las features y los datos son idénticos. La única diferencia es el config:
+- Regresión: `5L × 20T, lr=0.8` → capas anchas
+- Clasificación: `20L × 5T, lr=0.1` → capas estrechas
+
+**Mecanismo matemático:** El NNLS resuelve `min ||A·w - pseudo_y||²` donde `A ∈ R^(n,T)`. Con `T=5` (clasificación) la matriz es muy estrecha. Las 5 columnas de `A` provienen de 5 árboles entrenados sobre bootstraps del mismo conjunto con `max_features=None` (todas las features): la única fuente de diversidad entre columnas es el ruido de bootstrap. Con `T=20` (regresión) el NNLS tiene 20 columnas con más diversidad estructural → selección de señal efectiva.
+
+Cuando las 5 columnas son casi colineales, `cond(A) >> 1` y NNLS converge a pesos ~uniformes `1/5` → equivale a un RF de 5 árboles por capa, mucho peor que un RF de 100 árboles.
+
+**Cuantificación:** Para Electricity (8 features), `sqrt(8) ≈ 2.8` → con `max_features=None` y 5 árboles, los splits son casi idénticos. El NNLS sobre un `A(45312, 5)` casi singular produce pesos uniformes → el modelo es un RF de 5 árboles secuenciados 20 veces, no un DGBF.
+
+**Conclusión:** El config `20L×5T` para clasificación es subóptimo para el mecanismo NNLS. El config `5L×20T` (regresión) extrae mucho más valor del NNLS.
+
+---
+
+### Causa raíz 2: Electricity — concept drift temporal + baja diversidad (ESTRUCTURAL)
+
+**Observación:** DGB-RF = -0.049 en Electricity (mayor gap que DGB-XGB = -0.041). Incluso XGB pierde vs RF (-0.009). El RF es el mejor modelo en este dataset.
+
+**Mecanismo:** OpenML split 168 (electricity) usa folds contiguos temporalmente. La distribución P(y|X) cambia a lo largo del tiempo (precios de electricidad → concept drift). El RF es naturalmente robusto al drift porque sus árboles son independientes y pueden capturar distintas épocas de la distribución. Los métodos boosting (DGB y XGB) amplifican el drift: cada capa secuencial corrige residuos de la capa anterior, que se ajustaron sobre datos históricos → el sesgo temporal se acumula en las capas.
+
+**Por qué DGB pierde más que XGB ante RF:** XGB con 100 estimadores secuenciales tiene más iteraciones para corregir el drift. DGB con 20 capas de 5 árboles (≡ 5-árbol RF secuenciado) tiene peor diversidad por capa debido a `n_trees=5`.
+
+**Conclusión:** El gap de Electricity es parcialmente estructural (drift → RF beats boosting) y parcialmente por config (`n_trees=5` baja diversidad). La mejora máxima posible con configuración es reducir la mitad del gap; la otra mitad es inherente al paradigma boosting secuencial.
+
+---
+
+### Hipótesis pendientes (nuevas tras análisis del benchmark académico)
+
+### H — Cambio de config clasificación: de 20L×5T a 10L×10T con lr=0.3 (ALTA PRIORIDAD)
+
+**Fundamento:** La asimetría Pol (mismos datos, DGB gana en regresión y pierde en clasificación) señala directamente al config como causa. El NNLS con 10 árboles por capa tiene matrix `A ∈ R^(n,10)` mucho mejor condicionada que `A ∈ R^(n,5)`. Con `lr=0.3` (=XGBoost default) la comparación es más justa.
+
+**Riesgo:** Reducir `n_layers` de 20 a 10 podría empeorar datasets donde la profundidad es clave (Bank-Marketing, Credit, Heloc). Pero como `n_trees` sube de 5 a 10, el NNLS gana calidad compensando.
+
+**Implementación:** Solo `benchmark/config.json` → `"n_layers": 10, "n_trees": 10, "learning_rate": 0.3`. Zero-code change.
+
+### I — max_features="sqrt" en config clasificación (ALTA PRIORIDAD, bajo riesgo)
+
+**Fundamento:** Con `n_trees=5` y `max_features=None`, la diversidad entre los 5 árboles proviene solo del bootstrap noise. Añadir `max_features="sqrt"` garantiza diversidad estructural (cada árbol usa subconjunto distinto de features). Para Electricity (8f): `sqrt(8)≈3` → 3 features por split → árboles estructuralmente diferentes.
+
+**Riesgo bajo:** `max_features="sqrt"` es el default de RF y está ampliamente validado. No requiere cambio de código, solo en `config.json`.
+
+**Nota importante:** `max_features="sqrt"` con presupuesto fijo reduce la profundidad efectiva de cada árbol (más splits aleatorios), lo que puede afectar negativamente datasets donde la señal está concentrada en pocas features. Sin embargo, con `max_depth=6` ya activo en el config actual, el riesgo de pérdida de precisión por features incompletas es bajo.
+
+### J — Disjoint feature assignment entre árboles de una misma capa (MEDIA PRIORIDAD, requiere código)
+
+**Concepto:** En lugar de `max_features="sqrt"` (aleatorio), asignar particiones disjuntas de features a los T árboles de cada capa. El árbol `t` usa features `{t*F//T, ..., (t+1)*F//T - 1}`. Esto garantiza correlación cero entre columnas de `A` para features no solapadas, condición número mínimo.
+
+**Problema potencial:** Particiones disjuntas pueden perder interacciones entre features de distintos grupos. En datasets donde la señal está en interacciones (Ailerons, Pol), esto puede empeorar.
+
+**Solución alternativa:** Particiones solapadas al 50% (`max_features=2*F//T`) — más diversidad que aleatorio, menos pérdida que disjunto puro.
+
+**Implementación:** `_fit_layer` en `dgbf_multioutput.py` y `dgbf.py`: sustituir `bootstrap_sampler` de features por un generador determinista de subconjuntos de features asignados por `t` (índice del árbol dentro de la capa).
+
+---
+
+## Análisis 1 — Impacto del config H+I (2026-04-20)
+
+**Hipótesis:** El config H+I (10L×10T, lr=0.3, max_features="sqrt") mejora la clasificación respecto al baseline per_class_trees (20L×5T, lr=0.1).
+**Datos usados:** `benchmark/results/*_cross_validation_test_scores.json` (8 datasets dev suite, 5-fold CV). Comparación histórica contra BITACORA Experimento 6.
+**Script:** `benchmark/analysis/config_hi_analysis.py`
+
+**Resultado:**
+
+| Dataset | Task | DGB viejo | DGB nuevo | ΔDGB | Gap viejo | Gap nuevo |
+|---|---|---|---|---|---|---|
+| Penguins | clf | 0.9911 | 0.9940 | +0.0029 ▲ | +0.0031 | +0.0059 |
+| Abalone | clf | 0.5483 | 0.5502 | +0.0019 ▲ | +0.0100 | +0.0127 |
+| Adult | clf | 0.8487 | 0.8563 | +0.0076 ▲ | −0.0204 | −0.0116 |
+| BankMarketing | clf | 0.8914 | 0.8781 | −0.0133 ▼ | −0.0125 | −0.0246 |
+| NavalVessel | reg | 0.9953 | 0.9953 | ≈0 | +0.0093 | +0.0093 |
+| BikeSales | reg | 0.8930 | 0.8907 | −0.0023 | +0.0062 | +0.0020 |
+| CaliforniaHousing | reg | 0.8285 | 0.8270 | −0.0015 | −0.0037 | −0.0047 |
+| Concrete | reg | 0.9354 | 0.9286 | −0.0068 | +0.0034 | +0.0068 |
+
+Media gap clasificación: −0.0050 → −0.0044 (+0.0005). Media gap regresión: +0.0038 → +0.0034 (−0.0004).
+
+**Conclusión:** El config H+I tiene efecto **asimétrico**. Mejora 3/4 datasets de clasificación — especialmente Adult (+0.0076, mejor resultado histórico en este dataset) y multiclase (Penguins, Abalone). Pero BankMarketing empeora −0.013, lo que cancela la mejora neta. El efecto negativo en BankMarketing sugiere que `lr=0.3` es demasiado agresivo para datasets binarios muy desbalanceados (12% positivo) donde el shrinkage conservador era necesario. La regresión no se ve afectada significativamente.
+
+**Acción recomendada:** Explorar config diferenciada por tipo de desbalance: mantener lr=0.3 para multiclase y datasets equilibrados, pero reducir a lr=0.1 o lr=0.15 para binario desbalanceado. Alternativamente, explorar Hipótesis K: lr adaptativo por clase basado en frecuencia de clase (sin romper la filosofía DGBF).

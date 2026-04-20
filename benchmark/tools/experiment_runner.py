@@ -84,6 +84,10 @@ class ExperimentRunner:
         self._datasets = {}
 
         for dataset in config["Datasets"]:
+            if dataset.get("function") == "openml_task":
+                self._datasets[dataset["name"]] = self._load_openml_dataset(dataset)
+                continue
+
             file_path = os.path.join(BENCHMARK_DIR, dataset["file"])
             if not os.path.exists(file_path):
                 os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -136,6 +140,33 @@ class ExperimentRunner:
             self._datasets[dataset["name"]] = (X, y, task)
 
         return self._datasets
+
+    def _load_openml_dataset(
+        self, dataset: dict
+    ) -> tuple[np.ndarray, np.ndarray, str]:
+        """Load a single OpenML task via :class:`~benchmark.tools.openml_loader.OpenMLLoader`.
+
+        Parameters
+        ----------
+        dataset : dict
+            Dataset entry from the config with keys ``"task_id"`` and optionally
+            ``"task"`` (used only as a sanity-check label; the actual task type
+            is inferred from the OpenML metadata).
+
+        Returns
+        -------
+        X : np.ndarray
+            Preprocessed feature matrix.
+        y : np.ndarray
+            Preprocessed target array.
+        task_type : str
+            ``"regression"`` or ``"classification"``.
+        """
+        from benchmark.tools.openml_loader import OpenMLLoader
+
+        loader = OpenMLLoader()
+        task_id = int(dataset["task_id"])
+        return loader.load(task_id)
 
     def run(self):
         for dataset_name, (X, y, task) in self.datasets.items():

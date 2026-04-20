@@ -59,11 +59,12 @@
       "module": "benchmark.models",
       "object": "DeepGBoostClassifierModel",
       "parameters": {
-        "n_layers": 20,
-        "n_trees": 5,
-        "learning_rate": 0.1,
+        "n_layers": 10,
+        "n_trees": 10,
+        "learning_rate": 0.3,
         "max_depth": 6,
         "min_weight_fraction_leaf": 0.001,
+        "max_features": "sqrt",
         "n_jobs": 8
       }
     }
@@ -85,7 +86,7 @@
       "name": "Penguins",
       "url": "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/main/inst/extdata/penguins.csv",
       "function": "read_csv",
-      "file": "data/penguins.csv",
+      "file": "data/uci/penguins.csv",
       "sep": ",",
       "target_column": "species",
       "task": "classification"
@@ -94,7 +95,7 @@
       "name": "BankMarketing",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00222/bank.zip",
       "function": "read_csv",
-      "file": "data/bank_full.csv",
+      "file": "data/uci/bank_full.csv",
       "sep": ";",
       "zip_entry": "bank-full.csv",
       "target_column": "y",
@@ -104,7 +105,7 @@
       "name": "Abalone",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data",
       "function": "read_csv",
-      "file": "data/abalone.csv",
+      "file": "data/uci/abalone.csv",
       "sep": ",",
       "target_column": "sex",
       "task": "classification"
@@ -113,7 +114,7 @@
       "name": "Adult",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data",
       "function": "read_csv",
-      "file": "data/adult.csv",
+      "file": "data/uci/adult.csv",
       "sep": ",",
       "skipinitialspace": true,
       "target_column": "income",
@@ -123,7 +124,7 @@
       "name": "NavalVessel",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00316/UCI%20CBM%20Dataset.zip",
       "function": "read_csv",
-      "file": "data/naval_vessel.csv",
+      "file": "data/uci/naval_vessel.csv",
       "sep": "\\s+",
       "zip_entry": "UCI CBM Dataset/data.txt",
       "target_column": "GT_turbine_decay",
@@ -133,7 +134,7 @@
       "name": "CaliforniaHousing",
       "url": "https://raw.githubusercontent.com/ageron/handson-ml2/master/datasets/housing/housing.csv",
       "function": "read_csv",
-      "file": "data/california_housing.csv",
+      "file": "data/uci/california_housing.csv",
       "sep": ",",
       "target_column": "median_house_value",
       "task": "regression"
@@ -142,7 +143,7 @@
       "name": "BikeSales",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00560/SeoulBikeData.csv",
       "function": "read_csv",
-      "file": "data/SeoulBikeData.csv",
+      "file": "data/uci/SeoulBikeData.csv",
       "sep": ",",
       "encoding": "latin-1",
       "target_column": "Rented Bike Count",
@@ -152,7 +153,7 @@
       "name": "Concrete",
       "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls",
       "function": "read_excel",
-      "file": "data/concrete.csv",
+      "file": "data/uci/concrete.csv",
       "sep": ",",
       "target_column": "Concrete compressive strength(MPa, megapascals) ",
       "task": "regression"
