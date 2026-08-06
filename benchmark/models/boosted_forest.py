@@ -10,9 +10,12 @@ from .abstract_model import AbstractModel
 
 class BoostedForest(AbstractModel):
     def __init__(
-        self, n_trees=10, n_layers=10, max_depth=None, learning_rate=0.1
+        self,
+        n_trees=10,
+        n_layers=10,
+        max_depth=None,
+        learning_rate=0.1,
     ):
-
         self.n_trees = n_trees
         self.n_layers = n_layers
         self.max_depth = max_depth

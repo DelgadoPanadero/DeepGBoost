@@ -17,7 +17,10 @@ class BenchmarkGenerator:
         return name.replace("_", " ").title()
 
     def _load_results(self) -> dict[str, dict[str, tuple[float, float]]]:
-        pattern = os.path.join(self._results_dir, "*_cross_validation_test.json")
+        pattern = os.path.join(
+            self._results_dir,
+            "*_cross_validation_test.json",
+        )
         data: dict[str, dict[str, tuple[float, float]]] = {}
         for path in sorted(glob.glob(pattern)):
             dataset = self._dataset_name(path)
@@ -54,7 +57,10 @@ class BenchmarkGenerator:
                     cells.append("-")
                     continue
                 mean, std = data[dataset][model]
-                best = max(data[dataset], key=lambda m, d=dataset: data[d][m][0])
+                best = max(
+                    data[dataset],
+                    key=lambda m, d=dataset: data[d][m][0],
+                )
                 cell = f"{mean:.4f} ± {std:.4f}"
                 if model == best:
                     cell = f"**{cell}**"
@@ -65,7 +71,10 @@ class BenchmarkGenerator:
 
     def save(self, output_path: str | None = None) -> str:
         if output_path is None:
-            output_path = os.path.join(self._results_dir, "benchmark_summary.md")
+            output_path = os.path.join(
+                self._results_dir,
+                "benchmark_summary.md",
+            )
         with open(output_path, "w") as f:
             f.write("# Benchmark Summary\n\n")
             f.write(self.generate_table())

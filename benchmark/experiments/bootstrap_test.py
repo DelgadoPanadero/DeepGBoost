@@ -34,7 +34,10 @@ class BootstrapModelTest(AbstractModelTest):
         stratify = y if self._task == "classification" else None
         for _ in tqdm(range(self._n_runs)):
             X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=self._test_size, stratify=stratify
+                X,
+                y,
+                test_size=self._test_size,
+                stratify=stratify,
             )
             yield X_train, y_train, X_test, y_test
 
@@ -49,7 +52,7 @@ class BootstrapModelTest(AbstractModelTest):
         }
 
         for i, (X_train, y_train, X_test, y_test) in enumerate(
-            self.create_batch(X, y)
+            self.create_batch(X, y),
         ):
             for model in self._models:
                 y_pred = model.fit(X_train, y_train).predict(X_test)

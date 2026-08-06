@@ -79,7 +79,9 @@ from sklearn.model_selection import train_test_split
 from deepgboost import DeepGBoostRegressor
 
 X, y = load_diabetes(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 model = DeepGBoostRegressor(n_trees=10, n_layers=10, max_depth=4, learning_rate=0.1)
 model.fit(X_train, y_train)
@@ -93,7 +95,9 @@ from sklearn.datasets import load_breast_cancer
 from deepgboost import DeepGBoostClassifier
 
 X, y = load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 clf = DeepGBoostClassifier(n_trees=10, n_layers=10, learning_rate=0.1)
 clf.fit(X_train, y_train)
@@ -103,11 +107,16 @@ print(clf.score(X_test, y_test))
 **Early stopping with callbacks**
 
 ```python
-from deepgboost import DeepGBoostRegressor, EarlyStoppingCallback, EvaluationMonitorCallback
+from deepgboost import (
+    DeepGBoostRegressor,
+    EarlyStoppingCallback,
+    EvaluationMonitorCallback,
+)
 
 model = DeepGBoostRegressor(n_trees=5, n_layers=20, learning_rate=0.05)
 model.fit(
-    X_train, y_train,
+    X_train,
+    y_train,
     eval_set=[(X_test, y_test)],
     callbacks=[EvaluationMonitorCallback(period=5), EarlyStoppingCallback(rounds=10)],
 )

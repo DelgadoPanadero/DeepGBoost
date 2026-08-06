@@ -17,7 +17,6 @@ BENCHMARK_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class ExperimentRunner:
     def __init__(self, config):
-
         try:
             self._load_models(config)
         except:
@@ -73,11 +72,15 @@ class ExperimentRunner:
             obj = experiment["object"]
             params = experiment["parameters"]
             fresh_models = [
-                getattr(import_module(mc["module"]), mc["object"])(**mc["parameters"])
+                getattr(import_module(mc["module"]), mc["object"])(
+                    **mc["parameters"],
+                )
                 for mc in self._model_configs[task].values()
             ]
             task_params = {**params, "models": fresh_models, "task": task}
-            experiments[obj] = getattr(import_module(module), obj)(**task_params)
+            experiments[obj] = getattr(import_module(module), obj)(
+                **task_params,
+            )
         return experiments
 
     def _load_datasets(self, config):
@@ -116,11 +119,11 @@ class ExperimentRunner:
             task = dataset.get("task", "regression")
             target = dataset["target_column"]
 
-            X = data.drop(target,axis=1)
-            if cat_cols := X.select_dtypes(exclude=['number']).columns.tolist():
+            X = data.drop(target, axis=1)
+            if cat_cols := X.select_dtypes(exclude=["number"]).columns.tolist():
                 encoder = OneHotEncoder()
                 new_data = encoder.fit_transform(
-                    X[cat_cols].astype(str).apply(lambda col: col.str.strip())
+                    X[cat_cols].astype(str).apply(lambda col: col.str.strip()),
                 )
                 X = X.drop(cat_cols, axis=1)
                 X[encoder.get_feature_names_out()] = new_data.todense()
@@ -130,7 +133,7 @@ class ExperimentRunner:
             if task == "classification":
                 encoder = LabelEncoder()
                 y = encoder.fit_transform(
-                    y.astype(str).apply(lambda col: col.strip())
+                    y.astype(str).apply(lambda col: col.strip()),
                 )
 
             self._datasets[dataset["name"]] = (X, y, task)
@@ -166,10 +169,14 @@ class ExperimentRunner:
             tag = ablation["tag"]
             n_layers = ablation.get("n_layers", dgb_defaults.get("n_layers"))
             n_trees = ablation.get("n_trees", dgb_defaults.get("n_trees"))
-            learning_rate = ablation.get("learning_rate", dgb_defaults.get("learning_rate"))
+            learning_rate = ablation.get(
+                "learning_rate",
+                dgb_defaults.get("learning_rate"),
+            )
             max_depth = ablation.get("max_depth", dgb_defaults.get("max_depth"))
             min_weight_fraction_leaf = ablation.get(
-                "min_weight_fraction_leaf", dgb_defaults.get("min_weight_fraction_leaf")
+                "min_weight_fraction_leaf",
+                dgb_defaults.get("min_weight_fraction_leaf"),
             )
             n_runs = ablation.get("n_runs", 5)
             test_size = ablation.get("test_size", 0.25)
@@ -177,7 +184,9 @@ class ExperimentRunner:
             for dataset_name, (X, y) in classification_datasets.items():
                 # Fresh baseline instances (all classification models except the last).
                 baseline_models = [
-                    getattr(import_module(mc["module"]), mc["object"])(**mc["parameters"])
+                    getattr(import_module(mc["module"]), mc["object"])(
+                        **mc["parameters"],
+                    )
                     for mc in clf_models[:-1]
                 ]
                 dgb_model = DeepGBoostClassifierModel(

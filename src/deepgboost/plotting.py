@@ -22,10 +22,11 @@ def plot_importance(
     importance_type: str = "gain",
     feature_names: list[str] | None = None,
     title: str = "Feature Importance",
-    xlabel: str = "Importance Score",
+    xlabel: str = "Mean Contribution",
     ax=None,
-    figsize: tuple[float, float] = (8, 6),
-    color: str = "#3498db",
+    figsize: tuple[float, float] | None = None,
+    positive_color: str = "#ff0051",
+    negative_color: str = "#008bfb",
 ) -> "tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]":
     """
     Plot feature importances as a horizontal bar chart.
@@ -49,10 +50,13 @@ def plot_importance(
         X-axis label.
     ax : matplotlib.axes.Axes or None
         Axes to plot on.  A new figure is created if ``None``.
-    figsize : tuple
-        Figure size when creating a new figure.
-    color : str
-        Bar colour.
+    figsize : tuple or None
+        Figure size when creating a new figure.  If ``None``, the height is
+        derived from the number of features shown (~0.35 in per bar).
+    positive_color : str
+        Bar colour for features with a positive mean contribution.
+    negative_color : str
+        Bar colour for features with a negative mean contribution.
 
     Returns
     -------
@@ -73,9 +77,9 @@ def plot_importance(
         )
 
     _, contributions = model.feature_contributions(np.asarray(X))
-    importances = np.abs(contributions).mean(axis=0)
+    mean_contributions = contributions.mean(axis=0)
 
-    n_features = len(importances)
+    n_features = len(mean_contributions)
 
     if feature_names is None:
         # Try to retrieve from the model object
@@ -84,10 +88,16 @@ def plot_importance(
         else:
             feature_names = [f"f{i}" for i in range(n_features)]
 
-    # Sort and trim
-    indices = np.argsort(importances)[-max_features:]
+    # Sort by magnitude and trim, but keep the signed value for plotting
+    indices = np.argsort(np.abs(mean_contributions))[-max_features:]
     selected_names = [feature_names[i] for i in indices]
-    selected_scores = importances[indices]
+    selected_scores = mean_contributions[indices]
+    bar_colors = [
+        positive_color if v >= 0 else negative_color for v in selected_scores
+    ]
+
+    if figsize is None:
+        figsize = (8, max(2.0, 0.35 * len(indices)))
 
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
@@ -97,9 +107,10 @@ def plot_importance(
     ax.barh(
         range(len(indices)),
         selected_scores,
-        color=color,
+        color=bar_colors,
         edgecolor="white",
     )
+    ax.axvline(0, color="black", linewidth=0.8)
     ax.set_yticks(range(len(indices)))
     ax.set_yticklabels(selected_names)
     ax.set_title(title)

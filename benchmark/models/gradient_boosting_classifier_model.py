@@ -4,7 +4,7 @@ from .abstract_model import AbstractModel
 
 
 class GradientBoostingClassifierModel(AbstractModel):
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         self._model = GradientBoostingClassifier(**kwargs)
 
     @property

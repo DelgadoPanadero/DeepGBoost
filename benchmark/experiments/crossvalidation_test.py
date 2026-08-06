@@ -36,7 +36,7 @@ class CrossValidationModelTest(AbstractModelTest):
                 range(
                     i * n_rows // self._n_folds,
                     (i + 1) * n_rows // self._n_folds,
-                )
+                ),
             )
             train_mask = [j not in idx for j in range(n_rows)]
             test_mask = [j in idx for j in range(n_rows)]
@@ -59,7 +59,7 @@ class CrossValidationModelTest(AbstractModelTest):
             X_shuffled, y_shuffled = X[ids], y[ids]
 
             for i, (X_train, y_train, X_test, y_test) in enumerate(
-                self.create_batch(X_shuffled, y_shuffled)
+                self.create_batch(X_shuffled, y_shuffled),
             ):
                 for model in self._models:
                     y_pred = model.fit(X_train, y_train).predict(X_test)

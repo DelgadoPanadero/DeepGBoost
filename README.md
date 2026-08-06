@@ -42,7 +42,8 @@ from deepgboost import DeepGBoostRegressor
 
 X, y = load_diabetes(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42)
+    X, y, test_size=0.2, random_state=42
+)
 
 model = DeepGBoostRegressor(
     n_trees=10,

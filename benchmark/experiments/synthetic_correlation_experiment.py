@@ -35,6 +35,7 @@ RANDOM_SEED = 42
 # Synthetic data helpers
 # ---------------------------------------------------------------------------
 
+
 def _toeplitz_covariance(p: int, rho: float) -> np.ndarray:
     """Return a p×p Toeplitz correlation matrix with off-diagonal decay rho^|i-j|."""
     return toeplitz(rho ** np.arange(p))
@@ -64,6 +65,7 @@ def make_correlated_dataset(
 # ---------------------------------------------------------------------------
 # Experiment class
 # ---------------------------------------------------------------------------
+
 
 class SyntheticCorrelationExperiment(SyntheticModelTest):
     """
@@ -135,10 +137,16 @@ class SyntheticCorrelationExperiment(SyntheticModelTest):
         return r2_score(y_test, y_pred)
 
     def create_batch(
-        self, X: np.ndarray, y: np.ndarray
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
     ) -> Iterable[tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
         """K-fold cross-validation splits for one synthetic condition."""
-        kf = KFold(n_splits=self._n_folds, shuffle=True, random_state=self._seed)
+        kf = KFold(
+            n_splits=self._n_folds,
+            shuffle=True,
+            random_state=self._seed,
+        )
         for train_idx, test_idx in kf.split(X):
             yield X[train_idx], y[train_idx], X[test_idx], y[test_idx]
 

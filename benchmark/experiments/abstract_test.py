@@ -30,7 +30,8 @@ class AbstractModelTest:
 
     def _results_exist(self, name: str) -> bool:
         file_name = os.path.join(
-            RESULTS_DIR, f"{name.replace(' ', '_').lower()}.json"
+            RESULTS_DIR,
+            f"{name.replace(' ', '_').lower()}.json",
         )
         return os.path.exists(file_name)
 
@@ -46,12 +47,14 @@ class AbstractModelTest:
         for model_name, scores in scores_dict.items():
             if model_name != reference:
                 diff = ref_scores - scores
-                records.append({
-                    "diff_reference": reference,
-                    "diff_model": model_name,
-                    "mean": float(diff.mean()),
-                    "std": float(diff.std()),
-                })
+                records.append(
+                    {
+                        "diff_reference": reference,
+                        "diff_model": model_name,
+                        "mean": float(diff.mean()),
+                        "std": float(diff.std()),
+                    },
+                )
 
         file_name = (
             f"{BENCHMARK_DIR}/results/{name.replace(' ', '_').lower()}.json"
@@ -68,7 +71,9 @@ class AbstractModelTest:
         for values in zip(*score_arrays):
             record = {n: float(v) for n, v in zip(model_names, values)}
             for n, v in zip(model_names[:-1], values[:-1]):
-                record[f"diff_{reference}_vs_{n}"] = float(values[-1]) - float(v)
+                record[f"diff_{reference}_vs_{n}"] = float(values[-1]) - float(
+                    v,
+                )
             records.append(record)
 
         file_name = f"{BENCHMARK_DIR}/results/{name.replace(' ', '_').lower()}_scores.json"
